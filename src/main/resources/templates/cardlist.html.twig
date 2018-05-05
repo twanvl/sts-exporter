@@ -1,0 +1,51 @@
+<!DOCTYPE html!>
+<html>
+  <head>
+    <title>{{color}} cards</title>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+      table {
+        border-collapse: collapse;
+        font-size: 80%;
+      }
+      th {
+        text-align: left;
+        background-color: #ccc;
+        cursor: default;
+      }
+      td, th {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        padding: 5px;
+      }
+    </style>
+    <script src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+  </head>
+  <body>
+    <h1>{{color}} cards</h1>
+    <table class="sortable">
+      <tr>
+        <th>Name</th>
+        <th>Image</th>
+        <th>Upgraded image</th>
+        <th>Rarity</th>
+        <th>Type</th>
+        <th>Cost</th>
+        <th>Description</th>
+      </tr>
+      {% for card in cards %}
+      <tr>
+        <td>{{ card.name }}</td>
+        <td><img src="{{ card.relImage }}"></td>
+        <td><img src="{{ card.upgrade.relImage }}"></td>
+        <td>{{ card.rarity }}</td>
+        <td>{{ card.type }}</td>
+        <td>{{ card.costAndUpgrade }}</td>
+        <td>{{ card.textAndUpgrade }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>

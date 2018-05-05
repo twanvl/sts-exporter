@@ -1,0 +1,21 @@
+
+<!DOCTYPE html!>
+<html>
+  <head>
+    <title>Slay the Spire: exported cards</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        font-size: 80%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>All cards</h1>
+    <ul>
+    {% for color in colors %}
+      <li><a href="{{color}}/cardlist.html">{{capitalize(lower(color))}} cards</a></li>
+    {% endfor %}
+    </ul>
+  </body>
+</html>
