@@ -349,7 +349,7 @@ public class Exporter implements PostInitializeSubscriber {
         }
         if (prev == 'b') out.append(")");
         if (prev == 'a') {
-            out.append("(not");
+            out.append(" (not");
             for (int j = astart ; j < words.size() ; j++) {
                 out.append(" ");
                 out.append(words.get(j));
