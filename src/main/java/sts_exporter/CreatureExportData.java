@@ -5,11 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.esotericsoftware.spine.Skeleton;
+import com.badlogic.gdx.math.Matrix4;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.characters.Ironclad;
 import com.megacrit.cardcrawl.characters.TheSilent;
@@ -23,12 +20,13 @@ import com.megacrit.cardcrawl.dungeons.TheBeyond;
 import com.megacrit.cardcrawl.dungeons.TheCity;
 import com.megacrit.cardcrawl.helpers.EnemyData;
 import com.megacrit.cardcrawl.helpers.MonsterHelper;
+import com.megacrit.cardcrawl.map.MapRoomNode;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.monsters.MonsterGroup;
 import com.megacrit.cardcrawl.monsters.exordium.Lagavulin;
+import com.megacrit.cardcrawl.rooms.EmptyRoom;
 
 import basemod.BaseMod;
-import basemod.ReflectionHacks;
 
 public class CreatureExportData {
     public AbstractCreature creature;
@@ -65,35 +63,20 @@ public class CreatureExportData {
         int height = Math.round((creature.hb.height + 2*ypadding) * scale);
         // Render to a png
         CardExportData.renderSpriteBatchToPNG(creature.hb.x-xpadding,creature.hb.y-ypadding, creature.hb.width+2*xpadding,creature.hb.height+2*ypadding, width,height, imageFile, (SpriteBatch sb) -> {
-            // Note: the normal render code uses a PolygonSpriteBatch, which resets the projection matrix from our SpriteBatch
-            // Therefore we copy the essential rendering code here.
-            // This also saves us from initializing AbstractDungeon fields that are accessed, and doing work to disable health bars etc.
-            // Get the creature's skeleton
-            Skeleton skeleton = (Skeleton)ReflectionHacks.getPrivate(creature, AbstractCreature.class, "skeleton");
-            // Directly use the creature's skeleton
-            if (skeleton != null) {
-                if (creature.state != null) {
-                    creature.state.update(Gdx.graphics.getDeltaTime());
-                    creature.state.apply(skeleton);
-                }
-                skeleton.updateWorldTransform();
-                skeleton.setPosition(creature.drawX, creature.drawY);
-                skeleton.setColor(creature.tint.color);
-                PolygonSpriteBatch psb = new PolygonSpriteBatch();
-                psb.setProjectionMatrix(sb.getProjectionMatrix());
-                psb.begin();
-                AbstractCreature.sr.draw(psb, skeleton);
-                psb.end();
-                psb.dispose();
-            } else if (creature instanceof AbstractMonster) {
-                // draw image
-                AbstractMonster monster = (AbstractMonster)creature;
-                Texture img = (Texture)ReflectionHacks.getPrivate(monster, AbstractMonster.class, "img");
-                if (img != null) {
-                    sb.setColor(creature.tint.color);
-                    sb.draw(img, creature.drawX - (float)img.getWidth() * Settings.scale / 2.0f, creature.drawY, (float)img.getWidth() * Settings.scale, (float)img.getHeight() * Settings.scale, 0, 0, img.getWidth(), img.getHeight(), false, false);
-                }
+            // use AbstractCreature.render()
+            // Note: the normal render code uses a PolygonSpriteBatch CardCrawlGame.psb
+            Matrix4 oldProjection = CardCrawlGame.psb.getProjectionMatrix();
+            CardCrawlGame.psb.setProjectionMatrix(sb.getProjectionMatrix());
+            boolean oldHideCombatElements = Settings.hideCombatElements;
+            Settings.hideCombatElements = true; // don't render monster intent
+            if (creature instanceof AbstractPlayer) {
+                ((AbstractPlayer)creature).renderPlayerImage(sb);
+            } else {
+                creature.render(sb);
             }
+            // cleanup
+            CardCrawlGame.psb.setProjectionMatrix(oldProjection);
+            Settings.hideCombatElements = oldHideCombatElements;
         });
     }
 
@@ -103,6 +86,13 @@ public class CreatureExportData {
         // We need to initialize the random seeds before creating AbstractMonsters (for AbstractDungeon.monsterHpRng among others)
         Settings.seed = new Long(12345);
         AbstractDungeon.generateSeeds();
+
+        // For rendering monsters we need:
+        AbstractDungeon.player = new Ironclad("Ironclad", AbstractPlayer.PlayerClass.IRONCLAD);
+        AbstractDungeon.player.isDead = true; // don't render monster health bars
+        AbstractDungeon.currMapNode = new MapRoomNode(0, -1);
+        AbstractDungeon.currMapNode.room = new EmptyRoom();
+        AbstractDungeon.currMapNode.room.monsters = new MonsterGroup(new AbstractMonster[0]); // needed to render monsters
 
         // Get all player characters
         ArrayList<AbstractCreature> creatures = new ArrayList<>();
