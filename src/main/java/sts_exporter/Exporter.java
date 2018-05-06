@@ -9,6 +9,7 @@ import java.util.Collections;
 
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +24,7 @@ import basemod.interfaces.PostInitializeSubscriber;
 public class Exporter implements PostInitializeSubscriber {
     public static final Logger logger = LogManager.getLogger(Exporter.class.getName());
     private static final String[] templates = {"cardlist.html"};
-    private static final String[] indexTemplates = {"index.html"};
+    private static final String[] indexTemplates = {"index.html","creatures.html"};
 
     public Exporter() {
         BaseMod.subscribeToPostInitialize(this);
@@ -35,7 +36,11 @@ public class Exporter implements PostInitializeSubscriber {
 
     public void receivePostInitialize() {
         // Run exporter
-        exportAll("export");
+        try {
+            exportAll("export");
+        } catch (Exception e) {
+            logger.error("Error during export", e);
+        }
     }
 
     private static void mkdir(String dir) {
@@ -46,13 +51,21 @@ public class Exporter implements PostInitializeSubscriber {
     public static void exportAll(String outdir) {
         logger.info("Exporting all cards to " + outdir);
         mkdir(outdir);
+        // colors and cards
         ArrayList<String> colors = new ArrayList<>();
         for (AbstractCard.CardColor color : AbstractCard.CardColor.values()) {
             exportAll(color, outdir + "/" + color);
             colors.add(color.toString());
         }
+        // monsters
+        logger.info("Exporting creatures");
+        String monsterdir = outdir + "/creatures";
+        ArrayList<CreatureExportData> creatures = new ArrayList<>();
+        for (AbstractCreature m : CreatureExportData.getAllCreatures()) {
+            creatures.add(new CreatureExportData(m, monsterdir));
+        }
         // write index file
-        JtwigModel model = JtwigModel.newModel().with("colors",colors);
+        JtwigModel model = JtwigModel.newModel().with("colors",colors).with("creatures",creatures);
         for (String templateName : indexTemplates) {
             try {
                 logger.info("Writing " + outdir + "/" + templateName);
@@ -64,7 +77,7 @@ public class Exporter implements PostInitializeSubscriber {
                 logger.error(e);
             }
         }
-        logger.info("Done exporting cards.");
+        logger.info("Done exporting.");
     }
 
     public static void exportAll(AbstractCard.CardColor color, String outdir) {

@@ -3,7 +3,7 @@
 
   <groupId>StSExporter</groupId>
   <artifactId>StSExporter</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
 
   <name>Exporter</name>
   <description>A simple mod for Slay the Spire that can export card images and other data.</description>

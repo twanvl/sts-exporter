@@ -1,6 +1,6 @@
 # Slay the Spire card exporter
 
-A simple mod for Slay the Spire that can export card images and other data.
+A simple mod for Slay the Spire that can export card images, card data, and monster images.
 
 ## How to use it
 
