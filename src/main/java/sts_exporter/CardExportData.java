@@ -3,6 +3,7 @@ package sts_exporter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -89,6 +90,13 @@ public class CardExportData {
         int iwidth = Math.round(width), iheight = Math.round(height);
         card.current_x = width/2;
         card.current_y = height/2;
+        // Render card to png file
+        renderSpriteBatchToPNG(0,0, width,height, iwidth,iheight, imageFile, (SpriteBatch sb) -> {
+            card.render(sb,false);
+        });
+    }
+
+    public static void renderSpriteBatchToPNG(float x, float y, float width, float height, int iwidth, int iheight, String imageFile, Consumer<SpriteBatch> render) {
         // create a frame buffer
         FrameBuffer fbo = new FrameBuffer(Pixmap.Format.RGBA8888, iwidth, iheight, false);
         //make the FBO the current buffer
@@ -99,11 +107,11 @@ public class CardExportData {
         // set up batch and projection matrix
         SpriteBatch sb = new SpriteBatch();
         Matrix4 matrix = new Matrix4();
-        matrix.setToOrtho(0,iwidth, iheight,0, 0.f, 1.f); // note: flip the vertical direction, otherwise cards are upside down
+        matrix.setToOrtho(x, x+width, y+height,y, 0.f, 1.f); // note: flip the vertical direction, otherwise cards are upside down
         sb.setProjectionMatrix(matrix);
-        // render the card
+        // render the thing
         sb.begin();
-        card.render(sb, false);
+        render.accept(sb);
         sb.end();
         sb.dispose();
         // write to png file
