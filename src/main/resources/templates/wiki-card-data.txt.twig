@@ -1,0 +1,11 @@
+{% for card in cards %}
+    {Name = "{{ escape(card.name,'js') }}",
+    Image = "{{ card.image }}",
+    Color = "{{ card.color }}",
+    Rarity = "{{ card.rarity }}",
+    Type = "{{ card.type }}",
+    Cost = {{ card.card.cost }},{% if card.cost != card.upgrade.cost %}
+    CostPlus = {{ card.upgrade.card.cost }},{% endif %}
+    Text = "{{ escape(card.textWikiData,'js') }}",
+    Traits = {},
+    },{% endfor %}

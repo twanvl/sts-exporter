@@ -20,6 +20,9 @@
         border-bottom: 1px solid #ccc;
         padding: 5px;
       }
+      a img {
+        border: 0;
+      }
     </style>
     <script src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
   </head>
@@ -38,8 +41,8 @@
       {% for card in cards %}
       <tr>
         <td>{{ card.name }}</td>
-        <td><img src="{{ card.relImage }}"></td>
-        <td><img src="{{ card.upgrade.relImage }}"></td>
+        <td><a href="{{ card.relImage }}"><img src="{{ card.relImage }}" height="298"></a></td>
+        <td><a href="{{ card.upgrade.relImage }}"><img src="{{ card.upgrade.relImage }}" height="298"></a></td>
         <td>{{ card.rarity }}</td>
         <td>{{ card.type }}</td>
         <td>{{ card.costAndUpgrade }}</td>

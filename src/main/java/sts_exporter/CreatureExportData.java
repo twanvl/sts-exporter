@@ -56,15 +56,13 @@ public class CreatureExportData {
         // Get size of the creature.
         // We could use the hitbox, but that is not guaranteed to actually contain the whole image.
         // For now, just add a lot of padding.
-        float scale = 1.0f;
-        float xpadding = 100.0f;
-        float ypadding = 50.0f;
-        int width  = Math.round((creature.hb.width  + 2*xpadding) * scale);
-        int height = Math.round((creature.hb.height + 2*ypadding) * scale);
+        float scale = 1.0f / Settings.scale;
+        float xpadding = 90.0f;
+        float ypadding = 40.0f;
         // Render to a png
-        CardExportData.renderSpriteBatchToPNG(creature.hb.x-xpadding,creature.hb.y-ypadding, creature.hb.width+2*xpadding,creature.hb.height+2*ypadding, width,height, imageFile, (SpriteBatch sb) -> {
+        CardExportData.renderSpriteBatchToPNG(creature.hb.x-xpadding,creature.hb.y-ypadding, creature.hb.width+2*xpadding,creature.hb.height+2*ypadding, scale, imageFile, (SpriteBatch sb) -> {
             // use AbstractCreature.render()
-            // Note: the normal render code uses a PolygonSpriteBatch CardCrawlGame.psb
+            // Note: the normal render code uses a PolygonSpriteBatch CardCrawlGame.psb, so make sure the projection is the same
             Matrix4 oldProjection = CardCrawlGame.psb.getProjectionMatrix();
             CardCrawlGame.psb.setProjectionMatrix(sb.getProjectionMatrix());
             boolean oldHideCombatElements = Settings.hideCombatElements;
@@ -97,27 +95,16 @@ public class CreatureExportData {
         // Get all player characters
         ArrayList<AbstractCreature> creatures = new ArrayList<>();
         try {
-            Method createCharacter = CardCrawlGame.class.getDeclaredMethod("createCharacter");
+            Method createCharacter = CardCrawlGame.class.getDeclaredMethod("createCharacter", AbstractPlayer.PlayerClass.class);
             createCharacter.setAccessible(true);
             for (AbstractPlayer.PlayerClass playerClass : AbstractPlayer.PlayerClass.values()) {
-                AbstractPlayer p = (AbstractPlayer)createCharacter.invoke(null, "PlayerName", playerClass);
+                if (playerClass.toString() == "CROWBOT") continue; // old version of the game
+                AbstractPlayer p = (AbstractPlayer)createCharacter.invoke(null, playerClass);
                 p.name = p.title;
                 creatures.add(p);
             }
         } catch (Exception e) {
             Exporter.logger.error("Exception occured when getting createCharacter method", e);
-            // use basemod and hardcoded list instead.
-            creatures.add(new Ironclad("Ironclad", AbstractPlayer.PlayerClass.IRONCLAD));
-            creatures.add(new TheSilent("The Silent", AbstractPlayer.PlayerClass.THE_SILENT));
-            try {
-                for (AbstractPlayer.PlayerClass playerClass : AbstractPlayer.PlayerClass.values()) {
-                    AbstractPlayer p = BaseMod.createCharacter(playerClass.toString(), "PlayerName");
-                    p.name = p.title;
-                    creatures.add(p);
-                }
-            } catch (Exception e2) {
-                Exporter.logger.error("Backup strategy of using BaseMod createCharacter also failed", e2);
-            }
         }
 
         // Now get all monsters

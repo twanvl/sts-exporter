@@ -1,0 +1,18 @@
+
+{| class="article-table sortable"
+|+{{color}} Cards
+|-
+!Name
+!Picture
+!Rarity
+!Type
+!Energy
+!Description
+|-{% for card in cards %}
+|[[{{ card.name }}]]
+|[[File:{{ card.image }}|thumb|289x289px]]
+|{{ card.rarity }}
+|[[{{ card.type }}]]
+|{{ card.costAndUpgrade }}
+|{{ card.textWikiFormat }}
+|-{% endfor %}

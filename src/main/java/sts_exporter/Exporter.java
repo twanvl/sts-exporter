@@ -10,6 +10,7 @@ import java.util.Collections;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.AbstractCreature;
+import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +24,7 @@ import basemod.interfaces.PostInitializeSubscriber;
 @SpireInitializer
 public class Exporter implements PostInitializeSubscriber {
     public static final Logger logger = LogManager.getLogger(Exporter.class.getName());
-    private static final String[] templates = {"cardlist.html"};
+    private static final String[] templates = {"cardlist.html","cardlist.wiki","wiki-card-data.txt"};
     private static final String[] indexTemplates = {"index.html","creatures.html"};
 
     public Exporter() {
@@ -35,12 +36,16 @@ public class Exporter implements PostInitializeSubscriber {
     }
 
     public void receivePostInitialize() {
+        // set scale to 1.0
+        //float oldscale = Settings.scale;
+        //Settings.scale = 1.0f;
         // Run exporter
         try {
             exportAll("export");
         } catch (Exception e) {
             logger.error("Error during export", e);
         }
+        //Settings.scale = oldscale;
     }
 
     private static void mkdir(String dir) {
