@@ -1,0 +1,41 @@
+<!DOCTYPE html!>
+<html>
+  <head>
+    <title>Creatures of the spire</title>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+      table {
+        border-collapse: collapse;
+        font-size: 80%;
+      }
+      th {
+        text-align: left;
+        background-color: #ccc;
+        cursor: default;
+      }
+      td, th {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        padding: 5px;
+      }
+    </style>
+    <script src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+  </head>
+  <body>
+    <h1>Creatures</h1>
+    <table class="sortable">
+      <tr>
+        <th>Name</th>
+        <th>Image</th>
+      </tr>
+      {% for creature in creatures %}
+      <tr>
+        <td>{{ creature.name }}</td>
+        <td><img src="{{ creature.relImage }}"></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
