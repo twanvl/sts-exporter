@@ -370,13 +370,15 @@ public class CardExportData {
         if (mode == TextMode.WIKI_DATA) {
             return out.toString().replace(" .",".").replace(" ,",",").replace(" ]","]").replace("[ ","[").replace(" NL]"," NL ]").replace("[NL ","[ NL ").replace(" NL|"," NL |").replace("|NL ","| NL ");
         } else {
-            return out.toString().replace(" .",".").replace(" ,",",").replace(" )",")").replace("( ","(").replace(" NL)"," NL )").replace("(NL ","( NL ");
+            return out.toString().replace(" .",".").replace(" ,",",").replace(" )",")").replace("( ","(").replace(" NL)",") NL ").replace("(NL "," NL (");
         }
     }
 
     private static String preprocessText(String a, TextMode mode) {
         a = a.replace("."," .").replace(","," ,");
-        if (mode == TextMode.WIKI_DATA || mode == TextMode.WIKI_FORMAT) {
+        if (mode == TextMode.WIKI_DATA) {
+            a = a.replace("[R]","<R>").replace("[G]","<G>").replace("[B]","<B>");
+        } else if(mode == TextMode.WIKI_FORMAT) {
             final String[] energySymbols = {"[R] [R] [R]","[R] [R]","[R]", "[G] [G] [G]","[G] [G]","[G]", "[B] [B] [B]","[B] [B]","[B]"};
             for (String e : energySymbols) {
                 a = a.replace(e, (e.length()+1)/4 + " Energy");
