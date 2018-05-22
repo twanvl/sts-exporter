@@ -7,6 +7,8 @@ A simple mod for Slay the Spire that can export card images, card data, and mons
 Simply load the mod.
 At the start of the game, a directory "export" will be created that contains the card images and other card data in a HTML format.
 
+The size of the exported images is based on the resolution of the game. So for best results, set Slay the Spire to 1920x1080.
+
 ## Changing the export format
 
 The exporter uses JTwig, and it is very easy to write your own templates. See [the cardlist html template](src/main/resources/templates/cardlist.html.twig) for an example.
