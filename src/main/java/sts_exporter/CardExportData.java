@@ -1,5 +1,6 @@
 package sts_exporter;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
 import basemod.ReflectionHacks;
+import basemod.abstracts.CustomCard;
 
 public class CardExportData {
     public AbstractCard card;
@@ -121,8 +123,10 @@ public class CardExportData {
             card.isSeen = true;
             SingleCardViewPopup scv = CardCrawlGame.cardPopup;
             scv.open(card);
+            fixModdedImage(scv, card);
             SingleCardViewPopup.isViewingUpgrade = card.upgraded;
             SingleCardViewPopup.enableUpgradeToggle = false;
+            // get hitbox
             Hitbox cardHb = (Hitbox)ReflectionHacks.getPrivate(CardCrawlGame.cardPopup, SingleCardViewPopup.class, "cardHb");
             float lpadding = 64.0f * Settings.scale;
             float rpadding = 64.0f * Settings.scale;
@@ -149,6 +153,21 @@ public class CardExportData {
             });
             SingleCardViewPopup.enableUpgradeToggle = true;
             scv.close();
+        }
+    }
+
+    private void fixModdedImage(SingleCardViewPopup popup, AbstractCard card) {
+        // See basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup.OpenFix
+        // In short: BaseMod loads the large card image only when opening the SingleCardViewPopup with 2 arguments
+        Field portraitImageField;
+        try {
+            portraitImageField = popup.getClass().getDeclaredField("portraitImg");
+            portraitImageField.setAccessible(true);
+            if (portraitImageField.get(popup) == null && card instanceof CustomCard) {
+                portraitImageField.set(popup, CustomCard.getPortraitImage((CustomCard) card));
+            }
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
