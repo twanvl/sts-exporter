@@ -105,11 +105,7 @@ public class CreatureExportData {
         }
 
         // Now get all monsters
-        // There is unfortunately no list of all monsters in the game. The best we can do use use MonsterHelper.getMonster
-        for (String name : getAllMonsterNames()) {
-            creatures.add(MonsterHelper.getMonster(name));
-        }
-        // or MonsterHelper.getEncounter
+        // There is unfortunately no list of all monsters in the game. The best we can do is to use MonsterHelper.getEncounter
         HashSet<String> seenMonsters = new HashSet<>();
         for (String encounter : getAllEncounterNames()) {
             Exporter.logger.info("Getting monsters for encounter " + encounter);

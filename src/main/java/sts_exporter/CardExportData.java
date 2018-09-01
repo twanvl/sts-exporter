@@ -37,17 +37,21 @@ public class CardExportData {
     public int block, damage, magicNumber;
 
     public CardExportData(AbstractCard card, String imageDir) {
+        this(card, imageDir, true);
+    }
+
+    public CardExportData(AbstractCard card, String imageDir, boolean exportUpgrade) {
         card.initializeDescription();
         this.card = card;
         this.name = card.name;
         this.rarity = Exporter.rarityName(card.rarity);
         this.color = Exporter.colorName(card.color);
         this.type = Exporter.typeString(card.type);
-        if (!card.upgraded && card.canUpgrade()) {
+        if (exportUpgrade && !card.upgraded && card.canUpgrade()) {
             AbstractCard copy = card.makeCopy();
             copy.upgrade();
             copy.displayUpgrades();
-            this.upgrade = new CardExportData(copy, imageDir);
+            this.upgrade = new CardExportData(copy, imageDir, false);
         }
         // cost
         if (card.cost == -1) {

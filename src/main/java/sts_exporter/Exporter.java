@@ -27,13 +27,14 @@ public class Exporter implements PostInitializeSubscriber {
     private static final String[] indexTemplates = {"index.html","creatures.html"};
 
     public Exporter() {
-        BaseMod.subscribeToPostInitialize(this);
+        BaseMod.subscribe(this);
     }
 
     public static void initialize() {
         new Exporter();
     }
 
+    @Override
     public void receivePostInitialize() {
         // set scale to 1.0
         //float oldscale = Settings.scale;
