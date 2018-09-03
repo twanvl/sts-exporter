@@ -3,7 +3,7 @@
   "name": "Card Exporter",
   "author_list": ["twanvl"],
   "description": "A simple mod that can export card images and other data.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "sts_version": "08-23-2018",
   "mts_version": "3.0.0",
   "dependencies": ["basemod"],
