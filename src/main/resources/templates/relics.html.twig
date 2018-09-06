@@ -11,16 +11,14 @@
       <tr>
         <th>Name</th>
         <th>Image</th>
-        <th>Image</th>
         <th>Tier</th>
         <th>Description</th>
         <th>Flavor</th>
       </tr>
       {% for relic in relics %}
       <tr>
-        <td>{{ relic.name }}</td>
-        <td><img src="{{ relic.relImage }}"></td>
-        <td><img src="{{ relic.relSmallPopupImage }}"></td>
+        <td><a href="{{ relic.relPopupImage }}">{{ relic.name }}</a></td>
+        <td><img src="{{ relic.relImage }}" width="128" height="128"><a href="{{ relic.relPopupImage }}"><img src="{{ relic.relSmallPopupImage }}" class="popup"></a></td>
         <td>{{ relic.tier }}</td>
         <td>{{ relic.description }}</td>
         <td>{{ relic.flavorText }}</td>
