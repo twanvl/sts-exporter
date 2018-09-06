@@ -1,6 +1,5 @@
 package sts_exporter;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,9 +21,8 @@ import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 
 import basemod.ReflectionHacks;
-import basemod.abstracts.CustomCard;
 
-public class CardExportData {
+public class CardExportData implements Comparable<CardExportData> {
     public AbstractCard card;
     public CardExportData upgrade;
     public String name;
@@ -453,5 +451,12 @@ public class CardExportData {
         }
         scanner.close();
         return out;
+    }
+
+    @Override
+    public int compareTo(CardExportData that) {
+        if (card.color != that.card.color) return card.color.compareTo(that.card.color);
+        if (card.rarity != that.card.rarity) return card.rarity.compareTo(that.card.rarity);
+        return name.compareTo(that.name);
     }
 }

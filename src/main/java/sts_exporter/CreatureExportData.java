@@ -27,7 +27,7 @@ import com.megacrit.cardcrawl.rooms.EmptyRoom;
 import basemod.BaseMod;
 import basemod.ReflectionHacks;
 
-public class CreatureExportData {
+public class CreatureExportData implements Comparable<CreatureExportData> {
     public AbstractCreature creature;
     public String image, absImage, relImage;
     public String name;
@@ -87,6 +87,7 @@ public class CreatureExportData {
         for (AbstractCreature m : getAllCreatures()) {
             creatures.add(new CreatureExportData(m, outdir));
         }
+        Collections.sort(creatures);
         return creatures;
     }
 
@@ -173,4 +174,10 @@ public class CreatureExportData {
         return creatures;
     }
 
+    @Override
+    public int compareTo(CreatureExportData that) {
+        if (creature.isPlayer && !that.creature.isPlayer) return -1;
+        if (!creature.isPlayer && that.creature.isPlayer) return 1;
+        return name.compareTo(that.name);
+    }
 }

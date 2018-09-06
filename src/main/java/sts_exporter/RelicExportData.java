@@ -18,7 +18,7 @@ import com.megacrit.cardcrawl.helpers.RelicLibrary;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.screens.SingleRelicViewPopup;
 
-class RelicExportData {
+class RelicExportData implements Comparable<RelicExportData> {
     public AbstractRelic relic;
     public ModExportData mod;
     public String tier;
@@ -226,7 +226,7 @@ class RelicExportData {
         for (AbstractRelic relic : getAllRelics()) {
             relics.add(new RelicExportData(relic, imagedir));
         }
-        Collections.sort(relics, (RelicExportData a, RelicExportData b) -> { return a.name.compareTo(b.name); });
+        Collections.sort(relics);
         return relics;
     }
 
@@ -240,5 +240,11 @@ class RelicExportData {
         allRelics.addAll(RelicLibrary.specialList);
         allRelics.addAll(RelicLibrary.shopList);
         return allRelics;
+    }
+
+    @Override
+    public int compareTo(RelicExportData that) {
+        if (relic.tier != that.relic.tier) return relic.tier.compareTo(that.relic.tier);
+        return name.compareTo(that.name);
     }
 }

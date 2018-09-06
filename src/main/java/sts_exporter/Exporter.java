@@ -117,7 +117,7 @@ public class Exporter implements PostInitializeSubscriber {
         for (AbstractCard c : cards) {
             cardData.add(new CardExportData(c.makeCopy(), imagedir, smallImagedir));
         }
-        Collections.sort(cardData, (CardExportData a, CardExportData b) -> { return a.name.compareTo(b.name); });
+        Collections.sort(cardData);
         // Export HTML file with all cards
         JtwigModel model = JtwigModel.newModel();
         model.with("selection", colorName(color));
@@ -128,6 +128,10 @@ public class Exporter implements PostInitializeSubscriber {
     static void exportAllMods(String modsdir) {
         mkdir(modsdir);
         for (ModExportData mod : mods) {
+            Collections.sort(mod.cards);
+            Collections.sort(mod.relics);
+            Collections.sort(mod.creatures);
+            Collections.sort(mod.potions);
             JtwigModel model = JtwigModel.newModel();
             model.with("mod", mod);
             model.with("cards", mod.cards);

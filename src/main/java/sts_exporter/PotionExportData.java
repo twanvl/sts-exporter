@@ -1,6 +1,7 @@
 package sts_exporter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -8,7 +9,7 @@ import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.helpers.PotionHelper;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 
-class PotionExportData {
+class PotionExportData implements Comparable<PotionExportData> {
     public AbstractPotion potion;
     public ModExportData mod;
     public String image, absImage, relImage;
@@ -60,6 +61,7 @@ class PotionExportData {
         for (HashMap.Entry<String,AbstractPlayer.PlayerClass> potionID : getAllPotionIds().entrySet()) {
             potions.add(new PotionExportData(PotionHelper.getPotion(potionID.getKey()), potionID.getValue(), outdir));
         }
+        Collections.sort(potions);
         return potions;
     }
 
@@ -76,5 +78,11 @@ class PotionExportData {
             }
         }
         return potions;
+    }
+
+    @Override
+    public int compareTo(PotionExportData that) {
+        if (potion.rarity != that.potion.rarity) return potion.rarity.compareTo(that.potion.rarity);
+        return name.compareTo(that.name);
     }
 }
