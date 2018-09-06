@@ -3,6 +3,7 @@ package sts_exporter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -168,6 +169,7 @@ public class CreatureExportData {
         byrd.name = byrd.name + " (Grounded)";
         creatures.add(byrd);
 
+        Collections.sort(creatures, (AbstractMonster a, AbstractMonster b) -> { return a.name.compareTo(b.name); });
         return creatures;
     }
 

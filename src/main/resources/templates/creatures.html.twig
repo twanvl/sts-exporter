@@ -11,11 +11,13 @@
       <tr>
         <th>Name</th>
         <th>Image</th>
+        <th>Mod</th>
       </tr>
       {% for creature in creatures %}
       <tr>
         <td>{{ creature.name }}</td>
         <td><img src="{{ creature.relImage }}"></td>
+        <td>{{ creature.mod.modName }}</td>
       </tr>
       {% endfor %}
     </table>

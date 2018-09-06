@@ -11,7 +11,7 @@ import com.evacipated.cardcrawl.modthespire.ModInfo;
 class ModExportData {
     public ModInfo info;
     public String id;
-    public String name;
+    public String name, modName;
     public URL url;
     public ArrayList<CardExportData> cards = new ArrayList<>();
     public ArrayList<RelicExportData> relics = new ArrayList<>();
@@ -22,6 +22,7 @@ class ModExportData {
         this.info = info;
         this.id = info.ID;
         this.name = info.Name;
+        this.modName = info.Name;
         this.url = info.jarURL;
     }
 
@@ -29,6 +30,7 @@ class ModExportData {
         this.info = null;
         this.id = "Slay the Spire";
         this.name = "Slay the Spire";
+        this.modName = "";
         try {
             this.url = new File(Loader.STS_JAR).toURI().toURL();
         } catch (MalformedURLException e) {
