@@ -1,6 +1,7 @@
 package sts_exporter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -19,6 +20,7 @@ import com.megacrit.cardcrawl.screens.SingleRelicViewPopup;
 class RelicExportData {
     public AbstractRelic relic;
     public ModExportData mod;
+    public String tier;
     public String image, absImage, relImage;
     public String popupImage, absPopupImage, relPopupImage;
     public String smallPopupImage, absSmallPopupImage, relSmallPopupImage;
@@ -31,6 +33,7 @@ class RelicExportData {
         this.name = relic.name;
         this.description = relic.description;
         this.flavorText = relic.flavorText;
+        this.tier = Exporter.tierName(relic.tier);
         // Render image
         exportImageToDir(imageDir);
     }
@@ -192,6 +195,7 @@ class RelicExportData {
         for (AbstractRelic relic : getAllRelics()) {
             relics.add(new RelicExportData(relic, imagedir));
         }
+        Collections.sort(relics, (RelicExportData a, RelicExportData b) -> { return a.name.compareTo(b.name); });
         return relics;
     }
 
