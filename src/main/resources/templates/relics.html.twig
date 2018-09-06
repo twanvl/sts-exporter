@@ -14,6 +14,7 @@
         <th>Tier</th>
         <th>Description</th>
         <th>Flavor</th>
+        <th>Mod</th>
       </tr>
       {% for relic in relics %}
       <tr>
@@ -22,6 +23,7 @@
         <td>{{ relic.tier }}</td>
         <td>{{ relic.description }}</td>
         <td>{{ relic.flavorText }}</td>
+        <td>{{ relic.mod.name }}</td>
       </tr>
       {% endfor %}
     </table>
