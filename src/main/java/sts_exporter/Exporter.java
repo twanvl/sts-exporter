@@ -14,6 +14,7 @@ import com.evacipated.cardcrawl.modthespire.ModInfo;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
+import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 
 import org.apache.logging.log4j.LogManager;
@@ -231,6 +232,10 @@ public class Exporter implements PostInitializeSubscriber {
     }
 
     public static String rarityName(AbstractCard.CardRarity rarity) {
+        return toTitleCase(rarity.toString()); // TODO: localize
+    }
+
+    public static String rarityName(AbstractPotion.PotionRarity rarity) {
         return toTitleCase(rarity.toString()); // TODO: localize
     }
 
