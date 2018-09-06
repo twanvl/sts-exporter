@@ -13,6 +13,7 @@
         <th>Image</th>
         <th>Rarity</th>
         <th>Description</th>
+        <th>Mod</th>
       </tr>
       {% for potion in potions %}
       <tr>
@@ -20,6 +21,7 @@
         <td><img src="{{ potion.relImage }}"></td>
         <td>{{ potion.rarity }}</td>
         <td>{{ potion.descriptionHTML }}</td>
+        <td><a href="mods/{{mod.id}}.html">{{ potion.mod.modName }}</a></td>
       </tr>
       {% endfor %}
     </table>

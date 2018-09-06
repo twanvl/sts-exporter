@@ -17,7 +17,7 @@
       <tr>
         <td>{{ creature.name }}</td>
         <td><img src="{{ creature.relImage }}"></td>
-        <td>{{ creature.mod.modName }}</td>
+        <td><a href="mods/{{mod.id}}.html">{{ creature.mod.modName }}</a></td>
       </tr>
       {% endfor %}
     </table>
