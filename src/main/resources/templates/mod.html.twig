@@ -47,7 +47,7 @@
         <td><a href="../{{ relic.relPopupImage }}">{{ relic.name }}</a></td>
         <td><img src="../{{ relic.relImage }}" width="128" height="128"><a href="../{{ relic.relPopupImage }}"><img src="../{{ relic.relSmallPopupImage }}" class="popup"></a></td>
         <td>{{ relic.tier }}</td>
-        <td>{{ relic.description }}</td>
+        <td>{{ relic.descriptionHTML }}</td>
         <td>{{ relic.flavorText }}</td>
       </tr>
       {% endfor %}
@@ -68,7 +68,7 @@
         <td>{{ potion.name }}</td>
         <td><img src="../{{ potion.relImage }}"></td>
         <td>{{ potion.rarity }}</td>
-        <td>{{ potion.description }}</td>
+        <td>{{ potion.descriptionHTML }}</td>
       </tr>
       {% endfor %}
     </table>

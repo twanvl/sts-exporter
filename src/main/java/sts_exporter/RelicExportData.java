@@ -2,6 +2,7 @@ package sts_exporter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Scanner;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -24,7 +25,7 @@ class RelicExportData {
     public String image, absImage, relImage;
     public String popupImage, absPopupImage, relPopupImage;
     public String smallPopupImage, absSmallPopupImage, relSmallPopupImage;
-    public String name, description, flavorText;
+    public String name, description, descriptionHTML, flavorText;
 
     RelicExportData(AbstractRelic relic, String imageDir) {
         this.relic = relic;
@@ -32,6 +33,7 @@ class RelicExportData {
         this.mod.relics.add(this);
         this.name = relic.name;
         this.description = relic.description;
+        this.descriptionHTML = smartTextToHTML(relic.description);
         this.flavorText = relic.flavorText;
         this.tier = Exporter.tierName(relic.tier);
         // Render image
@@ -76,7 +78,6 @@ class RelicExportData {
         final float DESC_LINE_SPACING = 30.0f * Settings.scale;
         final float DESC_LINE_WIDTH = 418.0f * Settings.scale;
         final float RELIC_OFFSET_Y = 76.0f * Settings.scale;
-        Color fadeColor = Color.BLACK.cpy();
         String rarityLabel;
         Texture relicFrameImg;
         Color tmpColor;
@@ -188,6 +189,36 @@ class RelicExportData {
         });
         popup.close();
     }
+
+    public static String smartTextToHTML(String string) {
+        if (string == null) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder();
+        Scanner s = new Scanner(string);
+        while (s.hasNext()) {
+            String word = s.next();
+            if (word.equals("NL")) {
+                out.append("<br>\n");
+            } else if (word.equals("TAB")) {
+                out.append("\t");
+                continue;
+            } else if (word.charAt(0) == '#') {
+                out.append("<span class=\"color-");
+                out.append(word.charAt(1));
+                out.append("\">");
+                out.append(word.substring(2, word.length()));
+                out.append("</span> ");
+            } else {
+                // TODO: do something with orbs?
+                out.append(word);
+                out.append(" ");
+            }
+        }
+        s.close();
+        return out.toString();
+    }
+
 
     public static ArrayList<RelicExportData> exportAllRelics(String imagedir) {
         Exporter.mkdir(imagedir);

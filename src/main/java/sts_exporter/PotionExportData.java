@@ -12,7 +12,7 @@ class PotionExportData {
     public AbstractPotion potion;
     public ModExportData mod;
     public String image, absImage, relImage;
-    public String id, name, rarity, description;
+    public String id, name, rarity, description, descriptionHTML;
     public String playerClass;
 
     PotionExportData(AbstractPotion potion, AbstractPlayer.PlayerClass cls, String imageDir) {
@@ -22,6 +22,7 @@ class PotionExportData {
         this.id = potion.ID;
         this.name = potion.name;
         this.description = potion.description;
+        this.descriptionHTML = RelicExportData.smartTextToHTML(potion.description);
         this.rarity = Exporter.rarityName(potion.rarity);
         this.playerClass = playerClass == null ? "" : playerClass.toString();
         // Render image
