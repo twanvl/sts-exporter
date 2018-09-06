@@ -3,6 +3,7 @@
 * Export relics
 * Export potions
 * Make a per mod page of items from that mod
+* Include low resolution card images, to save bandwidth on large card pages.
 
 ### 0.2.2
 * Use BaseMod.encounterList to also export monsters from custom encounters.
