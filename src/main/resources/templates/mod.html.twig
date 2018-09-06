@@ -1,0 +1,89 @@
+<!DOCTYPE html!>
+<html>
+  <head>
+    <title>{{selection}} cards</title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+  </head>
+  <body>
+    {% if mod.cards %}
+    <h1>{{mod.name}} cards</h1>
+    <table class="sortable">
+      <tr>
+        <th>Name</th>
+        <th>Image</th>
+        <th>Upgraded image</th>
+        <th>Rarity</th>
+        <th>Type</th>
+        <th>Cost</th>
+        <th>Description</th>
+      </tr>
+      {% for card in mod.cards %}
+      <tr>
+        <td>{{ card.name }}</td>
+        <td><a href="../{{card.color}}/{{ card.relImage }}"><img src="../{{card.color}}/{{ card.relImage }}" height="298"></a></td>
+        <td>{% if card.upgrade %}<a href="../{{card.color}}/{{ card.upgrade.relImage }}"><img src="../{{card.color}}/{{ card.upgrade.relImage }}" height="298"></a>{% endif %} </td>
+        <td>{{ card.rarity }}</td>
+        <td>{{ card.type }}</td>
+        <td>{{ card.costAndUpgrade }}</td>
+        <td>{{ card.textAndUpgrade }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if mod.relics %}
+    <h1>{{mod.name}} relics</h1>
+    <table class="sortable">
+      <tr>
+        <th>Name</th>
+        <th>Image</th>
+        <th>Description</th>
+        <th>Flavor</th>
+      </tr>
+      {% for relic in mod.relics %}
+      <tr>
+        <td>{{ relic.name }}</td>
+        <td><img src="../{{ relic.relImage }}"></td>
+        <td>{{ relic.description }}</td>
+        <td>{{ relic.flavorText }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if mod.potions %}
+    <h1>{{mod.name}} potions</h1>
+    <table class="sortable">
+      <tr>
+        <th>Name</th>
+        <th>Image</th>
+        <th>Description</th>
+      </tr>
+      {% for potion in mod.potions %}
+      <tr>
+        <td>{{ potion.name }}</td>
+        <td><img src="../{{ potion.relImage }}"></td>
+        <td>{{ potion.description }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if mod.creatures %}
+    <h1>{{mod.name}} creatures</h1>
+    <table class="sortable">
+      <tr>
+        <th>Name</th>
+        <th>Image</th>
+      </tr>
+      {% for creature in mod.creatures %}
+      <tr>
+        <td>{{ creature.name }}</td>
+        <td><img src="../{{ creature.relImage }}"></td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+  </body>
+</html>

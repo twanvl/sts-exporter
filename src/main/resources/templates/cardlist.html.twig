@@ -1,33 +1,12 @@
 <!DOCTYPE html!>
 <html>
   <head>
-    <title>{{color}} cards</title>
-    <style>
-      body {
-        font-family: sans-serif;
-      }
-      table {
-        border-collapse: collapse;
-        font-size: 80%;
-      }
-      th {
-        text-align: left;
-        background-color: #ccc;
-        cursor: default;
-      }
-      td, th {
-        border-top: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
-        padding: 5px;
-      }
-      a img {
-        border: 0;
-      }
-    </style>
+    <title>{{selection}} cards</title>
+    <link rel="stylesheet" href="../style.css">
     <script src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
   </head>
   <body>
-    <h1>{{color}} cards</h1>
+    <h1>{{selection}} cards</h1>
     <table class="sortable">
       <tr>
         <th>Name</th>
@@ -41,8 +20,8 @@
       {% for card in cards %}
       <tr>
         <td>{{ card.name }}</td>
-        <td><a href="{{ card.relImage }}"><img src="{{ card.relImage }}" height="298"></a></td>
-        <td><a href="{{ card.upgrade.relImage }}"><img src="{{ card.upgrade.relImage }}" height="298"></a></td>
+        <td><a href="{{ card.relImage }}"><img src="{{ card.relSmallImage }}" height="298"></a></td>
+        <td>{% if card.upgrade %}<a href="{{ card.upgrade.relImage }}"><img src="{{ card.upgrade.relSmallImage }}" height="298"></a>{% endif %}</td>
         <td>{{ card.rarity }}</td>
         <td>{{ card.type }}</td>
         <td>{{ card.costAndUpgrade }}</td>

@@ -2,13 +2,8 @@
 <!DOCTYPE html!>
 <html>
   <head>
-    <title>Slay the Spire: exported cards</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        font-size: 80%;
-      }
-    </style>
+    <title>Slay the Spire export</title>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <h1>Slay the Spire export</h1>
@@ -16,7 +11,11 @@
     {% for color in colors %}
       <li><a href="{{color}}/cardlist.html">{{capitalize(lower(color))}} cards</a></li>
     {% endfor %}
-      <li><a href="creatures.html">Creatures</a></li>
+      <li style="margin-top:1em;"><a href="relics.html">Relics</a></li>
+      <li style="margin-bottom:1em;"><a href="creatures.html">Creatures</a></li>
+    {% for mod in mods %}
+      <li><a href="mods/{{mod.id}}.html">Items from {{mod.name}}</a></li>
+    {% endfor %}
     </ul>
     Note: All images, card data, etc. are copyright by MegaCrit.
   </body>

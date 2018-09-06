@@ -1,21 +1,23 @@
 <!DOCTYPE html!>
 <html>
   <head>
-    <title>Creatures of the spire</title>
+    <title>Potions</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
   </head>
   <body>
-    <h1>Creatures</h1>
+    <h1>Potions</h1>
     <table class="sortable">
       <tr>
         <th>Name</th>
         <th>Image</th>
+        <th>Description</th>
       </tr>
-      {% for creature in creatures %}
+      {% for potion in potions %}
       <tr>
-        <td>{{ creature.name }}</td>
-        <td><img src="{{ creature.relImage }}"></td>
+        <td>{{ potion.name }}</td>
+        <td><img src="{{ potion.relImage }}"></td>
+        <td>{{ potion.description }}</td>
       </tr>
       {% endfor %}
     </table>

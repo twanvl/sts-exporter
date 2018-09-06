@@ -1,0 +1,29 @@
+<!DOCTYPE html!>
+<html>
+  <head>
+    <title>Relics</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+  </head>
+  <body>
+    <h1>Relics</h1>
+    <table class="sortable">
+      <tr>
+        <th>Name</th>
+        <th>Image</th>
+        <th>Image</th>
+        <th>Description</th>
+        <th>Flavor</th>
+      </tr>
+      {% for relic in relics %}
+      <tr>
+        <td>{{ relic.name }}</td>
+        <td><img src="{{ relic.relImage }}"></td>
+        <td><img src="{{ relic.relSmallPopupImage }}"></td>
+        <td>{{ relic.description }}</td>
+        <td>{{ relic.flavorText }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>

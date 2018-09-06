@@ -32,26 +32,32 @@ public class CardExportData {
     public String rarity;
     public String type;
     public String image, relImage, absImage;
+    public String relSmallImage, absSmallImage;
     public String cost, costAndUpgrade;
     public String text, textAndUpgrade, textWikiData, textWikiFormat;
     public int block, damage, magicNumber;
+    public ModExportData mod;
 
-    public CardExportData(AbstractCard card, String imageDir) {
-        this(card, imageDir, true);
+    public CardExportData(AbstractCard card, String imageDir, String smallImageDir) {
+        this(card, imageDir, smallImageDir, true);
     }
 
-    public CardExportData(AbstractCard card, String imageDir, boolean exportUpgrade) {
+    public CardExportData(AbstractCard card, String imageDir, String smallImageDir, boolean exportUpgrade) {
         card.initializeDescription();
         this.card = card;
         this.name = card.name;
         this.rarity = Exporter.rarityName(card.rarity);
         this.color = Exporter.colorName(card.color);
         this.type = Exporter.typeString(card.type);
+        this.mod = Exporter.findMod(card.getClass());
+        if (!card.upgraded) {
+            this.mod.cards.add(this);
+        }
         if (exportUpgrade && !card.upgraded && card.canUpgrade()) {
             AbstractCard copy = card.makeCopy();
             copy.upgrade();
             copy.displayUpgrades();
-            this.upgrade = new CardExportData(copy, imageDir, false);
+            this.upgrade = new CardExportData(copy, imageDir, smallImageDir, false);
         }
         // cost
         if (card.cost == -1) {
@@ -91,10 +97,10 @@ public class CardExportData {
                             .replace(" NL ", "\n");
         }
         // image
-        exportImageToDir(imageDir);
+        exportImageToDir(imageDir, smallImageDir);
     }
 
-    private void exportImageToDir(String imageDir) {
+    private void exportImageToDir(String imageDir, String smallImageDir) {
         String safename = this.name;
         safename = safename.replace(" ","");
         safename = safename.replace("/","");
@@ -102,77 +108,68 @@ public class CardExportData {
         this.image = safename + ".png";
         this.absImage = imageDir + "/" + safename + ".png";
         this.relImage = "card-images/" + safename + ".png";
-        exportImageToFile(this.absImage);
+        this.absSmallImage = smallImageDir + "/" + safename + ".png";
+        this.relSmallImage = "small-card-images/" + safename + ".png";
+        exportImageToFile(this.absImage, this.absSmallImage);
     }
 
-    private void exportImageToFile(String imageFile) {
+    private void exportImageToFile(String imageFile, String smallImageFile) {
         Exporter.logger.info("Rendering card image to " + imageFile);
-        if (false) {
-            // This is the in-game rendering path
-            // Scale and position of the card
-            // IMG_WIDTH,IMG_HEIGHT are only for the card border, mana cost and rarity banner is outside that, so add some padding.
-            card.drawScale = 1.0f;
-            float width  = (AbstractCard.IMG_WIDTH + 24.0f) * card.drawScale;
-            float height = (AbstractCard.IMG_HEIGHT + 24.0f) * card.drawScale;
-            int iwidth = Math.round(width), iheight = Math.round(height);
-            card.current_x = width/2;
-            card.current_y = height/2;
-            // Render card to png file
-            renderSpriteBatchToPNG(0,0, width,height, iwidth,iheight, imageFile, (SpriteBatch sb) -> {
-                card.render(sb,false);
-            });
-        } else {
-            // Use SingleCardViewPopup, to get better image and better fonts.
-            card.isLocked = false;
-            card.isSeen = true;
-            SingleCardViewPopup scv = CardCrawlGame.cardPopup;
-            scv.open(card);
-            fixModdedImage(scv, card);
-            SingleCardViewPopup.isViewingUpgrade = card.upgraded;
-            SingleCardViewPopup.enableUpgradeToggle = false;
-            // get hitbox
-            Hitbox cardHb = (Hitbox)ReflectionHacks.getPrivate(CardCrawlGame.cardPopup, SingleCardViewPopup.class, "cardHb");
-            float lpadding = 64.0f * Settings.scale;
-            float rpadding = 64.0f * Settings.scale;
-            float tpadding = 64.0f * Settings.scale;
-            float bpadding = 40.0f * Settings.scale;
-            // Note: We would like to use a scale=1/Settings.scale, but that doesn't actually work, since fonts are initialized at startup using Settings.scale
-            // Note2: y is up instead of down, so use y-bpadding
-            renderSpriteBatchToPNG(cardHb.x-lpadding, cardHb.y-bpadding, cardHb.width+lpadding+rpadding, cardHb.height+tpadding+bpadding, 1.0f, imageFile, (SpriteBatch sb) -> {
-                // We can't just call
-                //CardCrawlGame.cardPopup.render(sb);
-                // because that also draws a UI
-                callPrivate(scv, SingleCardViewPopup.class, "renderCardBack", SpriteBatch.class, sb);
-                callPrivate(scv, SingleCardViewPopup.class, "renderPortrait", SpriteBatch.class, sb);
-                callPrivate(scv, SingleCardViewPopup.class, "renderFrame", SpriteBatch.class, sb);
-                callPrivate(scv, SingleCardViewPopup.class, "renderCardBanner", SpriteBatch.class, sb);
-                callPrivate(scv, SingleCardViewPopup.class, "renderCardTypeText", SpriteBatch.class, sb);
-                if (Settings.lineBreakViaCharacter) {
-                    callPrivate(scv, SingleCardViewPopup.class, "renderDescriptionCN", SpriteBatch.class, sb);
-                } else {
-                    callPrivate(scv, SingleCardViewPopup.class, "renderDescription", SpriteBatch.class, sb);
-                }
-                callPrivate(scv, SingleCardViewPopup.class, "renderTitle", SpriteBatch.class, sb);
-                callPrivate(scv, SingleCardViewPopup.class, "renderCost", SpriteBatch.class, sb);
-            });
-            SingleCardViewPopup.enableUpgradeToggle = true;
-            scv.close();
-        }
+        // Use SingleCardViewPopup, to get better image and better fonts.
+        card.isLocked = false;
+        card.isSeen = true;
+        SingleCardViewPopup scv = CardCrawlGame.cardPopup;
+        scv.open(card);
+        SingleCardViewPopup.isViewingUpgrade = card.upgraded;
+        SingleCardViewPopup.enableUpgradeToggle = false;
+        // get hitbox
+        Hitbox cardHb = (Hitbox)ReflectionHacks.getPrivate(CardCrawlGame.cardPopup, SingleCardViewPopup.class, "cardHb");
+        float lpadding = 64.0f * Settings.scale;
+        float rpadding = 64.0f * Settings.scale;
+        float tpadding = 64.0f * Settings.scale;
+        float bpadding = 40.0f * Settings.scale;
+        // Note: We would like to use a scale=1/Settings.scale, but that doesn't actually work, since fonts are initialized at startup using Settings.scale
+        // Note2: y is up instead of down, so use y-bpadding
+        renderSpriteBatchToPixmap(cardHb.x-lpadding, cardHb.y-bpadding, cardHb.width+lpadding+rpadding, cardHb.height+tpadding+bpadding, 1.0f, (SpriteBatch sb) -> {
+            // We can't just call
+            //CardCrawlGame.cardPopup.render(sb);
+            // because that also draws a UI
+            callPrivate(scv, SingleCardViewPopup.class, "renderCardBack", SpriteBatch.class, sb);
+            callPrivate(scv, SingleCardViewPopup.class, "renderPortrait", SpriteBatch.class, sb);
+            callPrivate(scv, SingleCardViewPopup.class, "renderFrame", SpriteBatch.class, sb);
+            callPrivate(scv, SingleCardViewPopup.class, "renderCardBanner", SpriteBatch.class, sb);
+            callPrivate(scv, SingleCardViewPopup.class, "renderCardTypeText", SpriteBatch.class, sb);
+            if (Settings.lineBreakViaCharacter) {
+                callPrivate(scv, SingleCardViewPopup.class, "renderDescriptionCN", SpriteBatch.class, sb);
+            } else {
+                callPrivate(scv, SingleCardViewPopup.class, "renderDescription", SpriteBatch.class, sb);
+            }
+            callPrivate(scv, SingleCardViewPopup.class, "renderTitle", SpriteBatch.class, sb);
+            callPrivate(scv, SingleCardViewPopup.class, "renderCost", SpriteBatch.class, sb);
+        }, (Pixmap pixmap) -> {
+            PixmapIO.writePNG(Gdx.files.local(imageFile), pixmap);
+            Pixmap smallPixmap = resizePixmap(pixmap, 231, 298);
+            PixmapIO.writePNG(Gdx.files.local(smallImageFile), smallPixmap);
+            smallPixmap.dispose();
+        });
+        SingleCardViewPopup.enableUpgradeToggle = true;
+        scv.close();
     }
 
-    private void fixModdedImage(SingleCardViewPopup popup, AbstractCard card) {
-        // See basemod.patches.com.megacrit.cardcrawl.screens.SingleCardViewPopup.OpenFix
-        // In short: BaseMod loads the large card image only when opening the SingleCardViewPopup with 2 arguments
-        Field portraitImageField;
-        try {
-            portraitImageField = popup.getClass().getDeclaredField("portraitImg");
-            portraitImageField.setAccessible(true);
-            if (portraitImageField.get(popup) == null && card instanceof CustomCard) {
-                portraitImageField.set(popup, CustomCard.getPortraitImage((CustomCard) card));
-            }
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+    private void exportImageToFileLowResolution(String imageFile) {
+        // This is the in-game rendering path
+        // Scale and position of the card
+        // IMG_WIDTH,IMG_HEIGHT are only for the card border, mana cost and rarity banner is outside that, so add some padding.
+        card.drawScale = 1.0f;
+        float width  = (AbstractCard.IMG_WIDTH + 24.0f) * card.drawScale;
+        float height = (AbstractCard.IMG_HEIGHT + 24.0f) * card.drawScale;
+        int iwidth = Math.round(width), iheight = Math.round(height);
+        card.current_x = width/2;
+        card.current_y = height/2;
+        // Render card to png file
+        renderSpriteBatchToPNG(0,0, width,height, iwidth,iheight, imageFile, (SpriteBatch sb) -> {
+            card.render(sb,false);
+        });
     }
 
     public static Object callPrivate(Object obj, Class<?> objClass, String methodName, Class<?> paramType, Object arg) {
@@ -191,6 +188,14 @@ public class CardExportData {
     }
 
     public static void renderSpriteBatchToPNG(float x, float y, float width, float height, int iwidth, int iheight, String imageFile, Consumer<SpriteBatch> render) {
+        renderSpriteBatchToPixmap(x,y,width,height,iwidth,iheight,render,(Pixmap pixmap) -> PixmapIO.writePNG(Gdx.files.local(imageFile), pixmap));
+    }
+
+    public static void renderSpriteBatchToPixmap(float x, float y, float width, float height, float scale, Consumer<SpriteBatch> render, Consumer<Pixmap> write) {
+        renderSpriteBatchToPixmap(x,y,width,height, Math.round(scale*width), Math.round(scale*height), render, write);
+    }
+
+    public static void renderSpriteBatchToPixmap(float x, float y, float width, float height, int iwidth, int iheight, Consumer<SpriteBatch> render, Consumer<Pixmap> write) {
         // create a frame buffer
         FrameBuffer fbo = new FrameBuffer(Pixmap.Format.RGBA8888, iwidth, iheight, false);
         //make the FBO the current buffer
@@ -210,10 +215,17 @@ public class CardExportData {
         sb.dispose();
         // write to png file
         Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0,0, iwidth, iheight);
-        PixmapIO.writePNG(Gdx.files.local(imageFile), pixmap);
+        write.accept(pixmap);
         pixmap.dispose();
         // done
         fbo.end();
+    }
+
+    public static Pixmap resizePixmap(Pixmap pixmap, int width, int height) {
+        Pixmap resized = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+        resized.setFilter(Pixmap.Filter.BiLinear);
+        resized.drawPixmap(pixmap, 0,0,pixmap.getWidth(),pixmap.getHeight(), 0,0,width,height);
+        return resized;
     }
 
     public static String typeString(AbstractCard.CardType type) {
