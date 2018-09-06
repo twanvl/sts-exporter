@@ -2,6 +2,7 @@ package sts_exporter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import com.badlogic.gdx.Gdx;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
@@ -18,16 +20,20 @@ import com.megacrit.cardcrawl.helpers.RelicLibrary;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 import com.megacrit.cardcrawl.screens.SingleRelicViewPopup;
 
+import basemod.BaseMod;
+import basemod.ReflectionHacks;
+
 class RelicExportData implements Comparable<RelicExportData> {
     public AbstractRelic relic;
     public ModExportData mod;
     public String tier;
+    public String pool;
     public String image, absImage, relImage;
     public String popupImage, absPopupImage, relPopupImage;
     public String smallPopupImage, absSmallPopupImage, relSmallPopupImage;
     public String name, description, descriptionHTML, flavorText;
 
-    RelicExportData(AbstractRelic relic, String imageDir) {
+    RelicExportData(AbstractRelic relic, AbstractCard.CardColor pool, String imageDir) {
         this.relic = relic;
         this.mod = Exporter.findMod(relic.getClass());
         this.mod.relics.add(this);
@@ -36,6 +42,7 @@ class RelicExportData implements Comparable<RelicExportData> {
         this.descriptionHTML = smartTextToHTML(relic.description);
         this.flavorText = relic.flavorText;
         this.tier = Exporter.tierName(relic.tier);
+        this.pool = pool == null ? "" : Exporter.colorName(pool);
         // Render image
         exportImageToDir(imageDir);
     }
@@ -223,23 +230,26 @@ class RelicExportData implements Comparable<RelicExportData> {
     public static ArrayList<RelicExportData> exportAllRelics(String imagedir) {
         Exporter.mkdir(imagedir);
         ArrayList<RelicExportData> relics = new ArrayList<>();
-        for (AbstractRelic relic : getAllRelics()) {
-            relics.add(new RelicExportData(relic, imagedir));
+        HashMap<String,AbstractRelic> sharedRelics = (HashMap<String,AbstractRelic>)ReflectionHacks.getPrivateStatic(RelicLibrary.class, "sharedRelics");
+        for (AbstractRelic relic : sharedRelics.values()) {
+            relics.add(new RelicExportData(relic, null, imagedir));
+        }
+        for (AbstractRelic relic : RelicLibrary.redList) {
+            relics.add(new RelicExportData(relic, AbstractCard.CardColor.RED, imagedir));
+        }
+        for (AbstractRelic relic : RelicLibrary.greenList) {
+            relics.add(new RelicExportData(relic, AbstractCard.CardColor.GREEN, imagedir));
+        }
+        for (AbstractRelic relic : RelicLibrary.blueList) {
+            relics.add(new RelicExportData(relic, AbstractCard.CardColor.BLUE, imagedir));
+        }
+        for (HashMap.Entry<AbstractCard.CardColor,HashMap<String,AbstractRelic>> entry : BaseMod.getAllCustomRelics().entrySet()) {
+            for (AbstractRelic relic : entry.getValue().values()) {
+                relics.add(new RelicExportData(relic, entry.getKey(), imagedir));
+            }
         }
         Collections.sort(relics);
         return relics;
-    }
-
-        // List of all relics
-    public static ArrayList<AbstractRelic> getAllRelics() {
-        ArrayList<AbstractRelic> allRelics = new ArrayList<>();
-        allRelics.addAll(RelicLibrary.starterList);
-        allRelics.addAll(RelicLibrary.commonList);
-        allRelics.addAll(RelicLibrary.uncommonList);
-        allRelics.addAll(RelicLibrary.rareList);
-        allRelics.addAll(RelicLibrary.specialList);
-        allRelics.addAll(RelicLibrary.shopList);
-        return allRelics;
     }
 
     @Override
