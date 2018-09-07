@@ -2,7 +2,7 @@
   "modid": "StSExporter",
   "name": "Spire Exporter",
   "author_list": ["twanvl"],
-  "description": "A simple mod that can export card images and other data.",
+  "description": "Exports card images, relics, potions, creatures and other data to HTML.",
   "version": "0.3.0",
   "sts_version": "08-30-2018",
   "mts_version": "3.0.0",

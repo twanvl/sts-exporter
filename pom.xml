@@ -6,7 +6,7 @@
   <version>0.3.0</version>
 
   <name>SpireExporter</name>
-  <description>A simple mod for Slay the Spire that can export card images and other data.</description>
+  <description>Exports Slay the Spire card images, relics, potions, creatures and other data to HTML</description>
 
   <dependencies>
     <dependency>

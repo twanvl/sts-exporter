@@ -1,4 +1,4 @@
-# Slay the Spire card exporter
+# Slay the Spire exporter
 
 A simple mod for Slay the Spire that can export card images, relics, potions, and monster images.
 
