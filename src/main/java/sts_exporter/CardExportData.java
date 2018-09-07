@@ -217,6 +217,7 @@ public class CardExportData implements Comparable<CardExportData> {
         pixmap.dispose();
         // done
         fbo.end();
+        fbo.dispose();
     }
 
     public static Pixmap resizePixmap(Pixmap pixmap, int width, int height) {
