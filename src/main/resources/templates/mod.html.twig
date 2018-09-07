@@ -21,8 +21,8 @@
       {% for card in mod.cards %}
       <tr>
         <td>{{ card.name }}</td>
-        <td><a href="../{{card.color}}/{{ card.relImage }}"><img src="../{{card.color}}/{{ card.relImage }}" height="298"></a></td>
-        <td>{% if card.upgrade %}<a href="../{{card.color}}/{{ card.upgrade.relImage }}"><img src="../{{card.color}}/{{ card.upgrade.relImage }}" height="298"></a>{% endif %} </td>
+        <td><a href="../{{card.card.color}}/{{ card.relImage }}"><img src="../{{card.card.color}}/{{ card.relImage }}" height="298"></a></td>
+        <td>{% if card.upgrade %}<a href="../{{card.card.color}}/{{ card.upgrade.relImage }}"><img src="../{{card.card.color}}/{{ card.upgrade.relImage }}" height="298"></a>{% endif %} </td>
         <td>{{ card.rarity }}</td>
         <td>{{ card.type }}</td>
         <td>{{ card.costAndUpgrade }}</td>

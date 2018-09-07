@@ -1,3 +1,6 @@
+### 0.3.1
+* Fix mod pages on case sensitive file systems
+
 ### 0.3.0
 * Use BaseMod.customMonsters to also export custom monsters
 * Export relics
