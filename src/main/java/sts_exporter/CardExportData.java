@@ -456,8 +456,9 @@ public class CardExportData implements Comparable<CardExportData> {
 
     @Override
     public int compareTo(CardExportData that) {
-        if (card.color != that.card.color) return card.color.compareTo(that.card.color);
-        if (card.rarity != that.card.rarity) return card.rarity.compareTo(that.card.rarity);
-        return name.compareTo(that.name);
+        int result = card.color.compareTo(that.card.color);
+        if (result == 0) result = card.rarity.compareTo(that.card.rarity);
+        if (result == 0) result = name.compareTo(that.name);
+        return result;
     }
 }

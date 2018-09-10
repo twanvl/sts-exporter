@@ -107,9 +107,13 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
             Method createCharacter = CardCrawlGame.class.getDeclaredMethod("createCharacter", AbstractPlayer.PlayerClass.class);
             createCharacter.setAccessible(true);
             for (AbstractPlayer.PlayerClass playerClass : AbstractPlayer.PlayerClass.values()) {
-                AbstractPlayer p = (AbstractPlayer)createCharacter.invoke(null, playerClass);
-                p.name = p.title;
-                players.add(p);
+                try {
+                    AbstractPlayer p = (AbstractPlayer)createCharacter.invoke(null, playerClass);
+                    p.name = p.title;
+                    players.add(p);
+                } catch (Exception e) {
+                    Exporter.logger.error("Exception occured when creating character", e);
+                }
             }
         } catch (Exception e) {
             Exporter.logger.error("Exception occured when getting createCharacter method", e);
