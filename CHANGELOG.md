@@ -1,5 +1,6 @@
 ### 0.3.1
 * Fix mod pages on case sensitive file systems
+* Fix invalid characters in filenames (issue #1)
 
 ### 0.3.0
 * Use BaseMod.customMonsters to also export custom monsters

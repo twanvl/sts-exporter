@@ -99,15 +99,11 @@ public class CardExportData implements Comparable<CardExportData> {
     }
 
     private void exportImageToDir(String imageDir, String smallImageDir) {
-        String safename = this.name;
-        safename = safename.replace(" ","");
-        safename = safename.replace("/","");
-        safename = safename.replace("+","Plus");
-        this.image = safename + ".png";
-        this.absImage = imageDir + "/" + safename + ".png";
-        this.relImage = "card-images/" + safename + ".png";
-        this.absSmallImage = smallImageDir + "/" + safename + ".png";
-        this.relSmallImage = "small-card-images/" + safename + ".png";
+        this.image = Exporter.makeFilename(this.name) + ".png";
+        this.absImage = imageDir + "/" + this.image;
+        this.relImage = "card-images/" + this.image;
+        this.absSmallImage = smallImageDir + "/" + this.image;
+        this.relSmallImage = "small-card-images/" + this.image;
         exportImageToFile(this.absImage, this.absSmallImage);
     }
 

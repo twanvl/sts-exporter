@@ -64,6 +64,13 @@ public class Exporter implements PostInitializeSubscriber {
         f.mkdir();
     }
 
+    static String makeFilename(String id) {
+        id = id.replaceAll(":","-");
+        id = id.replace("+","Plus");
+        id = id.replace("*","Star");
+        return id.replaceAll("[\\s\\\\/:*?\"\'<>|+%]", "");
+    }
+
     public static void exportAll(String outdir) {
         logger.info("Exporting all cards to " + outdir);
         mkdir(outdir);

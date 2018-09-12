@@ -48,9 +48,7 @@ class RelicExportData implements Comparable<RelicExportData> {
     }
 
     private void exportImageToDir(String imageDir) {
-        String safename = relic.relicId;
-        safename = safename.replace(" ","");
-        safename = safename.replace("/","");
+        String safename = Exporter.makeFilename(relic.relicId);
         this.image = safename + ".png";
         this.absImage = imageDir + "/" + this.image;
         this.relImage = "relics/" + this.image;

@@ -42,13 +42,7 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
     }
 
     private void exportImageToDir(String imageDir) {
-        String safename = creature.getClass().getSimpleName();
-        if (creature.id != null) {
-            safename = creature.id;
-        }
-        safename = safename.replace(" ","");
-        safename = safename.replace("/","");
-        this.image = safename + ".png";
+        this.image = Exporter.makeFilename(creature.id != null ? creature.id : creature.getClass().getSimpleName()) + ".png";
         this.absImage = imageDir + "/" + this.image;
         this.relImage = "creatures/" + this.image;
         exportImageToFile(this.absImage);

@@ -31,12 +31,9 @@ class PotionExportData implements Comparable<PotionExportData> {
     }
 
     private void exportImageToDir(String imageDir) {
-        String safename = id;
-        safename = safename.replace(" ","");
-        safename = safename.replace("/","");
-        this.image = safename + ".png";
-        this.absImage = imageDir + "/" + safename + ".png";
-        this.relImage = "potions/" + safename + ".png";
+        this.image = Exporter.makeFilename(this.name) + ".png";
+        this.absImage = imageDir + "/" + this.image;
+        this.relImage = "potions/" + this.image;
         exportImageToFile(this.absImage);
     }
 
