@@ -1,0 +1,5 @@
+| Image | Name | Rarity | Color | Description | Flavor |
+| ----- | ---- | ------ | ----- | ----------- | ------ |
+{% for relic in relics
+%}| ![]({{ relic.relImage }}) | {{ relic.name }} | {{ relic.tier }} | {{ relic.pool }} | {{ relic.description }} | {{ relic.flavorText }} |
+{% endfor %}

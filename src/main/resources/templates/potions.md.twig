@@ -1,0 +1,5 @@
+| Image | Name | Rarity | Description |
+| ----- | ---- | ------ | ----------- |
+{% for potion in potions
+%}| ![]({{ potion.relImage }}) | {{ potion.name }} | {{ potion.rarity }} | {{ potion.description }} |
+{% endfor %}

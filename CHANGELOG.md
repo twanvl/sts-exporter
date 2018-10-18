@@ -1,3 +1,7 @@
+### 0.3.2
+* Fix for week 45 release
+* Add markdown export
+
 ### 0.3.1
 * Fix mod pages on case sensitive file systems
 * Fix invalid characters in filenames (issue #1)

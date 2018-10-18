@@ -14,8 +14,8 @@ import com.megacrit.cardcrawl.characters.Ironclad;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
-import com.megacrit.cardcrawl.daily.DailyMods;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.ModHelper;
 import com.megacrit.cardcrawl.helpers.MonsterHelper;
 import com.megacrit.cardcrawl.map.MapRoomNode;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
@@ -95,7 +95,7 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
     // Get all player characters
     public static ArrayList<AbstractPlayer> getAllPlayers() {
         // We need to initialize DailyMods before creating AbstractPlayers
-        DailyMods.setModsFalse();
+        ModHelper.setModsFalse();
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         try {
             Method createCharacter = CardCrawlGame.class.getDeclaredMethod("createCharacter", AbstractPlayer.PlayerClass.class);
@@ -121,7 +121,7 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
         AbstractDungeon.generateSeeds();
 
         // For rendering monsters we need:
-        AbstractDungeon.player = new Ironclad("Ironclad", AbstractPlayer.PlayerClass.IRONCLAD);
+        AbstractDungeon.player = CardCrawlGame.characterManager.getAllCharacters().get(0);
         AbstractDungeon.player.isDead = true; // don't render monster health bars
         AbstractDungeon.currMapNode = new MapRoomNode(0, -1);
         AbstractDungeon.currMapNode.room = new EmptyRoom();

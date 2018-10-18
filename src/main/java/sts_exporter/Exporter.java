@@ -31,8 +31,8 @@ import javassist.NotFoundException;
 @SpireInitializer
 public class Exporter implements PostInitializeSubscriber {
     public static final Logger logger = LogManager.getLogger(Exporter.class.getName());
-    private static final String[] colorTemplates = {"cardlist.html","cardlist.wiki","wiki-card-data.txt"};
-    private static final String[] indexTemplates = {"index.html","creatures.html","potions.html","relics.html","style.css"};
+    private static final String[] colorTemplates = {"cardlist.html","cardlist.md","cardlist.wiki","wiki-card-data.txt"};
+    private static final String[] indexTemplates = {"index.html","creatures.html","potions.html","relics.html","creatures.md","potions.md","relics.md","style.css"};
 
     private static ArrayList<ModExportData> mods = new ArrayList<>();
 
@@ -147,6 +147,7 @@ public class Exporter implements PostInitializeSubscriber {
             model.with("potions", mod.potions);
             model.with("selection", mod.name);
             writeTwigTemplate(model, "templates/mod.html.twig", modsdir + "/" + mod.id + ".html");
+            writeTwigTemplate(model, "templates/mod.md.twig", modsdir + "/" + mod.id + ".md");
         }
     }
 

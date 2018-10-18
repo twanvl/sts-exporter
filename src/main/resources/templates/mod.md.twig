@@ -1,0 +1,37 @@
+{% if mod.cards %}
+## Cards
+
+| Name | Image | Upgraded image | Rarity | Type | Cost | Description |
+| ---- | ----- | -------------- | ------ | ---- | ---- | ------------|
+{% for card in mod.cards
+%}| {{ card.name }} | ![]({{ card.relSmallImage }}) | ![]({{ card.upgrade.relSmallImage }}) | {{ card.rarity }} | {{ card.type }} | {{ card.costAndUpgrade }} | {{ card.textAndUpgrade }} |
+{% endfor %}
+{% endif %}
+
+{% if mod.creatures %}
+## Potions
+
+| Image | Name | Rarity | Description |
+| ----- | ---- | ------ | ----------- |
+{% for potion in mod.potions
+%}| ![]({{ potion.relImage }}) | {{ potion.name }} | {{ potion.rarity }} | {{ potion.description }} |
+{% endfor %}
+{% endif %}
+
+{% if mod.relics %}
+## Relics
+
+| Image | Name | Rarity | Color | Description | Flavor |
+| ----- | ---- | ------ | ----- | ----------- | ------ |
+{% for relic in mod.relics
+%}| ![]({{ relic.relImage }}) | {{ relic.name }} | {{ relic.tier }} | {{ relic.pool }} | {{ relic.description }} | {{ relic.flavorText }} |
+{% endfor %}
+{% endif %}
+
+{% if mod.creatures %}
+| Image | Name |
+| ----- | ---- |
+{% for creature in mod.creatures
+%}| ![]({{ creature.relImage }}) | {{ creature.name }} |
+{% endfor %}
+{% endif %}
