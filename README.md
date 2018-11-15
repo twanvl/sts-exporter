@@ -11,7 +11,7 @@ By default only modded items will be exported.
 
 ## Changing the export format
 
-The exporter uses JTwig, and it is very easy to write your own templates. See [the cardlist html template](src/main/resources/templates/cardlist.html.twig) for an example. Changing the template currently requires the mod to be recompiled, but if there is demand for it this could easily be changed.
+The exporter uses JTwig, and it is very easy to write your own templates. See [the cardlist markdown template](src/main/resources/templates/cards.html.md) for an example. Changing the template currently requires the mod to be recompiled, but if there is demand for it this could easily be changed.
 
 ## Installation ##
 1. [Download `ModTheSpire.jar`](https://github.com/kiooeht/ModTheSpire/releases)
