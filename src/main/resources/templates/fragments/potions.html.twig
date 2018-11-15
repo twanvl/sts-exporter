@@ -1,0 +1,18 @@
+<table class="sortable">
+  <tr>
+    <th>Name</th>
+    <th>Image</th>
+    <th>Rarity</th>
+    <th>Description</th>{% if listmod %}
+    <th>Mod</th>{% endif %}
+  </tr>
+  {% for potion in potions %}
+  <tr>
+    <td>{{ potion.name }}</td>
+    <td><img src="{{ potion.image.relativeTo(dir) }}"></td>
+    <td>{{ potion.rarity }}</td>
+    <td>{{ potion.descriptionHTML }}</td>{% if listmod %}
+    <td><a href="{{potion.mod.id}}/index.html">{{ potion.mod.modName }}</a></td>{% endif %}
+  </tr>
+  {% endfor %}
+</table>

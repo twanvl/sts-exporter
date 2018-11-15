@@ -4,18 +4,15 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
-import java.util.function.Consumer;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.helpers.GameDictionary;
 import com.megacrit.cardcrawl.helpers.Hitbox;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
@@ -29,25 +26,24 @@ public class CardExportData implements Comparable<CardExportData> {
     public String color;
     public String rarity;
     public String type;
-    public String image, relImage, absImage;
-    public String relSmallImage, absSmallImage;
+    public ExportPath image, smallImage;
     public String cost, costAndUpgrade;
     public String text, textAndUpgrade, textWikiData, textWikiFormat;
     public int block, damage, magicNumber;
     public ModExportData mod;
 
-    public CardExportData(AbstractCard card, String imageDir, String smallImageDir) {
-        this(card, imageDir, smallImageDir, true);
+    public CardExportData(ExportHelper export, AbstractCard card) {
+        this(export, card, true);
     }
 
-    public CardExportData(AbstractCard card, String imageDir, String smallImageDir, boolean exportUpgrade) {
+    public CardExportData(ExportHelper export, AbstractCard card, boolean exportUpgrade) {
         card.initializeDescription();
         this.card = card;
         this.name = card.name;
         this.rarity = Exporter.rarityName(card.rarity);
         this.color = Exporter.colorName(card.color);
         this.type = Exporter.typeString(card.type);
-        this.mod = Exporter.findMod(card.getClass());
+        this.mod = export.findMod(card.getClass());
         if (!card.upgraded) {
             this.mod.cards.add(this);
         }
@@ -55,7 +51,7 @@ public class CardExportData implements Comparable<CardExportData> {
             AbstractCard copy = card.makeCopy();
             copy.upgrade();
             copy.displayUpgrades();
-            this.upgrade = new CardExportData(copy, imageDir, smallImageDir, false);
+            this.upgrade = new CardExportData(export, copy, false);
         }
         // cost
         if (card.cost == -1) {
@@ -95,20 +91,21 @@ public class CardExportData implements Comparable<CardExportData> {
                             .replace(" NL ", "\n");
         }
         // image
-        exportImageToDir(imageDir, smallImageDir);
+        this.image = export.exportPath(this.mod, "card-images", this.name, ".png");
+        this.smallImage = export.exportPath(this.mod, "small-card-images", this.name, ".png");
     }
 
-    private void exportImageToDir(String imageDir, String smallImageDir) {
-        this.image = Exporter.makeFilename(this.name) + ".png";
-        this.absImage = imageDir + "/" + this.image;
-        this.relImage = "card-images/" + this.image;
-        this.absSmallImage = smallImageDir + "/" + this.image;
-        this.relSmallImage = "small-card-images/" + this.image;
-        exportImageToFile(this.absImage, this.absSmallImage);
+    public void exportImages() {
+        this.image.mkdir();
+        this.smallImage.mkdir();
+        exportImageToFile();
+        if (upgrade != null) {
+            upgrade.exportImages();
+        }
     }
 
-    private void exportImageToFile(String imageFile, String smallImageFile) {
-        Exporter.logger.info("Rendering card image to " + imageFile);
+    private void exportImageToFile() {
+        Exporter.logger.info("Rendering card image to " + image.absolute);
         // Use SingleCardViewPopup, to get better image and better fonts.
         card.isLocked = false;
         card.isSeen = true;
@@ -124,7 +121,7 @@ public class CardExportData implements Comparable<CardExportData> {
         float bpadding = 40.0f * Settings.scale;
         // Note: We would like to use a scale=1/Settings.scale, but that doesn't actually work, since fonts are initialized at startup using Settings.scale
         // Note2: y is up instead of down, so use y-bpadding
-        renderSpriteBatchToPixmap(cardHb.x-lpadding, cardHb.y-bpadding, cardHb.width+lpadding+rpadding, cardHb.height+tpadding+bpadding, 1.0f, (SpriteBatch sb) -> {
+        ExportHelper.renderSpriteBatchToPixmap(cardHb.x-lpadding, cardHb.y-bpadding, cardHb.width+lpadding+rpadding, cardHb.height+tpadding+bpadding, 1.0f, (SpriteBatch sb) -> {
             // We can't just call
             //CardCrawlGame.cardPopup.render(sb);
             // because that also draws a UI
@@ -141,9 +138,9 @@ public class CardExportData implements Comparable<CardExportData> {
             callPrivate(scv, SingleCardViewPopup.class, "renderTitle", SpriteBatch.class, sb);
             callPrivate(scv, SingleCardViewPopup.class, "renderCost", SpriteBatch.class, sb);
         }, (Pixmap pixmap) -> {
-            PixmapIO.writePNG(Gdx.files.local(imageFile), pixmap);
-            Pixmap smallPixmap = resizePixmap(pixmap, 231, 298);
-            PixmapIO.writePNG(Gdx.files.local(smallImageFile), smallPixmap);
+            PixmapIO.writePNG(Gdx.files.local(image.absolute), pixmap);
+            Pixmap smallPixmap = ExportHelper.resizePixmap(pixmap, 231, 298);
+            PixmapIO.writePNG(Gdx.files.local(smallImage.absolute), smallPixmap);
             smallPixmap.dispose();
         });
         SingleCardViewPopup.enableUpgradeToggle = true;
@@ -161,7 +158,7 @@ public class CardExportData implements Comparable<CardExportData> {
         card.current_x = width/2;
         card.current_y = height/2;
         // Render card to png file
-        renderSpriteBatchToPNG(0,0, width,height, iwidth,iheight, imageFile, (SpriteBatch sb) -> {
+        ExportHelper.renderSpriteBatchToPNG(0,0, width,height, iwidth,iheight, imageFile, (SpriteBatch sb) -> {
             card.render(sb,false);
         });
     }
@@ -175,52 +172,6 @@ public class CardExportData implements Comparable<CardExportData> {
            Exporter.logger.error("Exception occured when calling private method " + methodName + " of " + objClass.getName(), ex);
            return null;
         }
-    }
-
-    public static void renderSpriteBatchToPNG(float x, float y, float width, float height, float scale, String imageFile, Consumer<SpriteBatch> render) {
-        renderSpriteBatchToPNG(x,y,width,height, Math.round(scale*width), Math.round(scale*height), imageFile, render);
-    }
-
-    public static void renderSpriteBatchToPNG(float x, float y, float width, float height, int iwidth, int iheight, String imageFile, Consumer<SpriteBatch> render) {
-        renderSpriteBatchToPixmap(x,y,width,height,iwidth,iheight,render,(Pixmap pixmap) -> PixmapIO.writePNG(Gdx.files.local(imageFile), pixmap));
-    }
-
-    public static void renderSpriteBatchToPixmap(float x, float y, float width, float height, float scale, Consumer<SpriteBatch> render, Consumer<Pixmap> write) {
-        renderSpriteBatchToPixmap(x,y,width,height, Math.round(scale*width), Math.round(scale*height), render, write);
-    }
-
-    public static void renderSpriteBatchToPixmap(float x, float y, float width, float height, int iwidth, int iheight, Consumer<SpriteBatch> render, Consumer<Pixmap> write) {
-        // create a frame buffer
-        FrameBuffer fbo = new FrameBuffer(Pixmap.Format.RGBA8888, iwidth, iheight, false);
-        //make the FBO the current buffer
-        fbo.begin();
-        //... clear the FBO color with transparent black ...
-        Gdx.gl.glClearColor(0f, 0f, 0f, 0f); //transparent black
-        Gdx.gl.glClear(Gdx.gl.GL_COLOR_BUFFER_BIT); //clear the color buffer
-        // set up batch and projection matrix
-        SpriteBatch sb = new SpriteBatch();
-        Matrix4 matrix = new Matrix4();
-        matrix.setToOrtho(x, x+width, y+height,y, 0.f, 1.f); // note: flip the vertical direction, otherwise cards are upside down
-        sb.setProjectionMatrix(matrix);
-        // render the thing
-        sb.begin();
-        render.accept(sb);
-        sb.end();
-        sb.dispose();
-        // write to png file
-        Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0,0, iwidth, iheight);
-        write.accept(pixmap);
-        pixmap.dispose();
-        // done
-        fbo.end();
-        fbo.dispose();
-    }
-
-    public static Pixmap resizePixmap(Pixmap pixmap, int width, int height) {
-        Pixmap resized = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-        resized.setFilter(Pixmap.Filter.BiLinear);
-        resized.drawPixmap(pixmap, 0,0,pixmap.getWidth(),pixmap.getHeight(), 0,0,width,height);
-        return resized;
     }
 
     public static String typeString(AbstractCard.CardType type) {
@@ -448,6 +399,18 @@ public class CardExportData implements Comparable<CardExportData> {
         }
         scanner.close();
         return out;
+    }
+
+    public static ArrayList<CardExportData> exportAllCards(ExportHelper export) {
+        ArrayList<CardExportData> cards = new ArrayList<>();
+        for (AbstractCard.CardColor color : AbstractCard.CardColor.values()) {
+            ArrayList<AbstractCard> cardLibrary = CardLibrary.getCardList(CardLibrary.LibraryType.valueOf(color.name()));
+            for (AbstractCard c : cardLibrary) {
+                cards.add(new CardExportData(export, c.makeCopy()));
+            }
+        }
+        Collections.sort(cards);
+        return cards;
     }
 
     @Override

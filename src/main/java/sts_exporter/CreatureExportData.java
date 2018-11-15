@@ -2,7 +2,6 @@ package sts_exporter;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,7 +9,6 @@ import java.util.HashSet;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
-import com.megacrit.cardcrawl.characters.Ironclad;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
@@ -29,23 +27,21 @@ import basemod.ReflectionHacks;
 
 public class CreatureExportData implements Comparable<CreatureExportData> {
     public AbstractCreature creature;
-    public String image, absImage, relImage;
+    public ExportPath image;
     public String name;
     public ModExportData mod;
 
-    public CreatureExportData(AbstractCreature creature, String imageDir) {
+    public CreatureExportData(ExportHelper export, AbstractCreature creature) {
         this.creature = creature;
         this.name = creature.name;
-        this.mod = Exporter.findMod(creature.getClass());
+        this.mod = export.findMod(creature.getClass());
         this.mod.creatures.add(this);
-        exportImageToDir(imageDir);
+        this.image = export.exportPath(this.mod, "creatures", creature.id != null ? creature.id : creature.getClass().getSimpleName(), "png");
     }
 
-    private void exportImageToDir(String imageDir) {
-        this.image = Exporter.makeFilename(creature.id != null ? creature.id : creature.getClass().getSimpleName()) + ".png";
-        this.absImage = imageDir + "/" + this.image;
-        this.relImage = "creatures/" + this.image;
-        exportImageToFile(this.absImage);
+    public void exportImages() {
+        this.image.mkdir();
+        exportImageToFile(this.image.absolute);
     }
 
     private void exportImageToFile(String imageFile) {
@@ -57,7 +53,7 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
         float xpadding = 90.0f;
         float ypadding = 40.0f;
         // Render to a png
-        CardExportData.renderSpriteBatchToPNG(creature.hb.x-xpadding,creature.hb.y-ypadding, creature.hb.width+2*xpadding,creature.hb.height+2*ypadding, scale, imageFile, (SpriteBatch sb) -> {
+        ExportHelper.renderSpriteBatchToPNG(creature.hb.x-xpadding,creature.hb.y-ypadding, creature.hb.width+2*xpadding,creature.hb.height+2*ypadding, scale, imageFile, (SpriteBatch sb) -> {
             // use AbstractCreature.render()
             // Note: the normal render code uses a PolygonSpriteBatch CardCrawlGame.psb, so make sure the projection is the same
             Matrix4 oldProjection = CardCrawlGame.psb.getProjectionMatrix();
@@ -75,11 +71,10 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
         });
     }
 
-    public static ArrayList<CreatureExportData> exportAllCreatures(String outdir) {
-        Exporter.mkdir(outdir);
+    public static ArrayList<CreatureExportData> exportAllCreatures(ExportHelper export) {
         ArrayList<CreatureExportData> creatures = new ArrayList<>();
         for (AbstractCreature m : getAllCreatures()) {
-            creatures.add(new CreatureExportData(m, outdir));
+            creatures.add(new CreatureExportData(export, m));
         }
         Collections.sort(creatures);
         return creatures;
@@ -143,6 +138,7 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
         }
 
         // Custom monsters (BaseMod)
+		@SuppressWarnings("unchecked")
         HashMap<String,BaseMod.GetMonsterGroup> customMonsters =
             (HashMap<String,BaseMod.GetMonsterGroup>) ReflectionHacks.getPrivateStatic(BaseMod.class, "customMonsters");
         for (BaseMod.GetMonsterGroup group : customMonsters.values()) {

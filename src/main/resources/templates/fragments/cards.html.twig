@@ -1,0 +1,24 @@
+<table class="sortable">
+  <tr>
+    <th>Name</th>
+    <th>Image</th>
+    <th>Upgraded image</th>
+    <th>Rarity</th>
+    <th>Type</th>
+    <th>Cost</th>
+    <th>Description</th>{% if listmod %}
+    <th>Mod</th>{% endif %}
+  </tr>
+  {% for card in cards %}
+  <tr>
+    <td>{{ card.name }}</td>
+    <td><a href="{{ card.image.relativeTo(dir) }}"><img src="{{ card.smallImage.relativeTo(dir) }}" height="298"></a></td>
+    <td>{% if card.upgrade %}<a href="{{ card.upgrade.image.relativeTo(dir) }}"><img src="{{ card.upgrade.smallImage.relativeTo(dir) }}" height="298"></a>{% endif %}</td>
+    <td>{{ card.rarity }}</td>
+    <td>{{ card.type }}</td>
+    <td>{{ card.costAndUpgrade }}</td>
+    <td>{{ card.textAndUpgrade }}</td>{% if listmod %}
+    <td><a href="{{card.mod.id}}/index.html">{{ card.mod.modName }}</a></td>{% endif %}
+  </tr>
+  {% endfor %}
+</table>

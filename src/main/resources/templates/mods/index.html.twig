@@ -1,0 +1,29 @@
+<!DOCTYPE html!>
+<html>
+  <head>
+    <title>{{mod.name}} items</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+  </head>
+  <body>
+    {% if mod.cards %}
+    <h1>{{mod.name}} cards</h1>
+    {% include 'classpath:../fragments/cards.html.twig' %}
+    {% endif %}
+
+    {% if mod.relics %}
+    <h1>{{mod.name}} relics</h1>
+    {% include 'classpath:../fragments/relics.html.twig' %}
+    {% endif %}
+
+    {% if mod.potions %}
+    <h1>{{mod.name}} potions</h1>
+    {% include 'classpath:../fragments/potions.html.twig' %}
+    {% endif %}
+
+    {% if mod.creatures %}
+    <h1>{{mod.name}} creatures</h1>
+    {% include 'classpath:../fragments/creatures.html.twig' %}
+    {% endif %}
+  </body>
+</html>

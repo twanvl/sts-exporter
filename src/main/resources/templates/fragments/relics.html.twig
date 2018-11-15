@@ -1,0 +1,22 @@
+<table class="sortable">
+  <tr>
+    <th>Name</th>
+    <th>Image</th>
+    <th>Tier</th>
+    <th>Pool</th>
+    <th>Description</th>
+    <th>Flavor</th>{% if listmod %}
+    <th>Mod</th>{% endif %}
+  </tr>
+  {% for relic in relics %}
+  <tr>
+    <td><a href="{{ relic.popupImage.relativeTo(dir) }}">{{ relic.name }}</a></td>
+    <td><img src="{{ relic.image.relativeTo(dir) }}" width="128" height="128"><a href="{{ relic.popupImage.relativeTo(dir) }}"><img src="{{ relic.smallPopupImage.relativeTo(dir) }}" class="popup"></a></td>
+    <td>{{ relic.tier }}</td>
+    <td>{{ relic.pool }}</td>
+    <td>{{ relic.descriptionHTML }}</td>
+    <td>{{ relic.flavorText }}</td>{% if listmod %}
+    <td><a href="{{relic.mod.id}}/index.html">{{ relic.mod.modName }}</a></td>{% endif %}
+  </tr>
+  {% endfor %}
+</table>

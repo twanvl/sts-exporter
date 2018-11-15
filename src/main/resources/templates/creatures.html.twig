@@ -7,19 +7,6 @@
   </head>
   <body>
     <h1>Creatures</h1>
-    <table class="sortable">
-      <tr>
-        <th>Name</th>
-        <th>Image</th>
-        <th>Mod</th>
-      </tr>
-      {% for creature in creatures %}
-      <tr>
-        <td>{{ creature.name }}</td>
-        <td><img src="{{ creature.relImage }}"></td>
-        <td><a href="mods/{{mod.id}}.html">{{ creature.mod.modName }}</a></td>
-      </tr>
-      {% endfor %}
-    </table>
+    {% include 'classpath:fragments/creatures.html.twig' %}
   </body>
 </html>

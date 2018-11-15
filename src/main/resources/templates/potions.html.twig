@@ -7,23 +7,6 @@
   </head>
   <body>
     <h1>Potions</h1>
-    <table class="sortable">
-      <tr>
-        <th>Name</th>
-        <th>Image</th>
-        <th>Rarity</th>
-        <th>Description</th>
-        <th>Mod</th>
-      </tr>
-      {% for potion in potions %}
-      <tr>
-        <td>{{ potion.name }}</td>
-        <td><img src="{{ potion.relImage }}"></td>
-        <td>{{ potion.rarity }}</td>
-        <td>{{ potion.descriptionHTML }}</td>
-        <td><a href="mods/{{potion.mod.id}}.html">{{ potion.mod.modName }}</a></td>
-      </tr>
-      {% endfor %}
-    </table>
+    {% include 'classpath:fragments/potions.html.twig' %}
   </body>
 </html>

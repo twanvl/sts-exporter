@@ -1,5 +1,5 @@
 | Image | Name |
 | ----- | ---- |
 {% for creature in creatures
-%}| ![]({{ creature.relImage }}) | {{ creature.name }} |
+%}| ![]({{ creature.image.relativeTo(dir) }}) | {{ creature.name }} |
 {% endfor %}

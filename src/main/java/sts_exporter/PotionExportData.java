@@ -12,13 +12,13 @@ import com.megacrit.cardcrawl.potions.AbstractPotion;
 class PotionExportData implements Comparable<PotionExportData> {
     public AbstractPotion potion;
     public ModExportData mod;
-    public String image, absImage, relImage;
+    public ExportPath image;
     public String id, name, rarity, description, descriptionHTML;
     public String playerClass;
 
-    PotionExportData(AbstractPotion potion, AbstractPlayer.PlayerClass cls, String imageDir) {
+    PotionExportData(ExportHelper export, AbstractPotion potion, AbstractPlayer.PlayerClass cls) {
         this.potion = potion;
-        this.mod = Exporter.findMod(potion.getClass());
+        this.mod = export.findMod(potion.getClass());
         this.mod.potions.add(this);
         this.id = potion.ID;
         this.name = potion.name;
@@ -26,15 +26,12 @@ class PotionExportData implements Comparable<PotionExportData> {
         this.descriptionHTML = RelicExportData.smartTextToHTML(potion.description);
         this.rarity = Exporter.rarityName(potion.rarity);
         this.playerClass = playerClass == null ? "" : playerClass.toString();
-        // Render image
-        exportImageToDir(imageDir);
+        this.image = export.exportPath(this.mod, "potions", this.name, ".png");
     }
 
-    private void exportImageToDir(String imageDir) {
-        this.image = Exporter.makeFilename(this.name) + ".png";
-        this.absImage = imageDir + "/" + this.image;
-        this.relImage = "potions/" + this.image;
-        exportImageToFile(this.absImage);
+    public void exportImages() {
+        this.image.mkdir();
+        exportImageToFile(this.image.absolute);
     }
 
     // Note: We can't use SingleRelicViewPopup, because that plays a sound.
@@ -47,16 +44,15 @@ class PotionExportData implements Comparable<PotionExportData> {
         float y = 0;
         float xpadding = 0.0f;
         float ypadding = 0.0f;
-        CardExportData.renderSpriteBatchToPNG(x-xpadding, y-ypadding, width+2*xpadding, height+2*ypadding, 1.0f, imageFile, (SpriteBatch sb) -> {
+        ExportHelper.renderSpriteBatchToPNG(x-xpadding, y-ypadding, width+2*xpadding, height+2*ypadding, 1.0f, imageFile, (SpriteBatch sb) -> {
             potion.render(sb);
         });
     }
 
-    public static ArrayList<PotionExportData> exportAllPotions(String outdir) {
-        Exporter.mkdir(outdir);
+    public static ArrayList<PotionExportData> exportAllPotions(ExportHelper export) {
         ArrayList<PotionExportData> potions = new ArrayList<>();
         for (HashMap.Entry<String,AbstractPlayer.PlayerClass> potionID : getAllPotionIds().entrySet()) {
-            potions.add(new PotionExportData(PotionHelper.getPotion(potionID.getKey()), potionID.getValue(), outdir));
+            potions.add(new PotionExportData(export, PotionHelper.getPotion(potionID.getKey()), potionID.getValue()));
         }
         Collections.sort(potions);
         return potions;

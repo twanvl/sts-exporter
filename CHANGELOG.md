@@ -1,3 +1,9 @@
+### 0.4.0
+* No longer automatically exports on startup (can be configured).
+* Exporting items from the base game can be disabled.
+* Exporter now works correctly when the game is scaled down.
+* Exported items are grouped per mod
+
 ### 0.3.2
 * Fix for week 45 release
 * Add markdown export

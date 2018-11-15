@@ -28,44 +28,40 @@ class RelicExportData implements Comparable<RelicExportData> {
     public ModExportData mod;
     public String tier;
     public String pool;
-    public String image, absImage, relImage;
-    public String popupImage, absPopupImage, relPopupImage;
-    public String smallPopupImage, absSmallPopupImage, relSmallPopupImage;
+    public AbstractCard.CardColor poolColor;
+    public ExportPath image;
+    public ExportPath popupImage;
+    public ExportPath smallPopupImage;
     public String name, description, descriptionHTML, flavorText;
 
-    RelicExportData(AbstractRelic relic, AbstractCard.CardColor pool, String imageDir) {
+    RelicExportData(ExportHelper export, AbstractRelic relic, AbstractCard.CardColor pool) {
         this.relic = relic;
-        this.mod = Exporter.findMod(relic.getClass());
+        this.mod = export.findMod(relic.getClass());
         this.mod.relics.add(this);
         this.name = relic.name;
         this.description = relic.description;
         this.descriptionHTML = smartTextToHTML(relic.description);
         this.flavorText = relic.flavorText;
         this.tier = Exporter.tierName(relic.tier);
+        this.poolColor = pool;
         this.pool = pool == null ? "" : Exporter.colorName(pool);
-        // Render image
-        exportImageToDir(imageDir);
+        this.image           = export.exportPath(this.mod, "relics", relic.relicId, ".png");
+        this.popupImage      = export.exportPath(this.mod, "relics/popup", relic.relicId, ".png");
+        this.smallPopupImage = export.exportPath(this.mod, "relics/small-popup", relic.relicId, ".png");
     }
 
-    private void exportImageToDir(String imageDir) {
-        String safename = Exporter.makeFilename(relic.relicId);
-        this.image = safename + ".png";
-        this.absImage = imageDir + "/" + this.image;
-        this.relImage = "relics/" + this.image;
-        exportImageToFile(this.absImage);
-        this.popupImage = safename + "-popup.png";
-        this.absPopupImage = imageDir + "/" + this.popupImage;
-        this.relPopupImage = "relics/" + this.popupImage;
-        this.smallPopupImage = safename + "-small-popup.png";
-        this.absSmallPopupImage = imageDir + "/" + this.smallPopupImage;
-        this.relSmallPopupImage = "relics/" + this.smallPopupImage;
-        exportPopupImageToFile(this.absPopupImage, this.absSmallPopupImage);
+    public void exportImages() {
+        this.image.mkdir();
+        this.popupImage.mkdir();
+        this.smallPopupImage.mkdir();
+        exportImageToFile();
+        exportPopupImageToFile();
     }
 
-    private void exportImageToFile(String imageFile) {
-        Exporter.logger.info("Rendering relic image to " + imageFile);
+    private void exportImageToFile() {
+        Exporter.logger.info("Rendering relic image to " + this.image.absolute);
         // Render to a png
-        CardExportData.renderSpriteBatchToPNG(0.f, 0.f, 256.f, 256.f, 1.0f, imageFile, (SpriteBatch sb) -> {
+        ExportHelper.renderSpriteBatchToPNG(0.f, 0.f, 256.f, 256.f, 1.0f, this.image.absolute, (SpriteBatch sb) -> {
             sb.setColor(new Color(0.0f, 0.0f, 0.0f, 0.33f));
             sb.draw(this.relic.outlineImg, 64.0f, 64.0f, 64.0f, 64.0f, 128.0f, 128.0f, 2.0f, 2.0f, 0.0f, 0, 0, 128, 128, false, false);
             sb.setColor(Color.WHITE);
@@ -77,8 +73,8 @@ class RelicExportData implements Comparable<RelicExportData> {
         });
     }
 
-    private void exportPopupImageToFile(String imageFile, String smallImageFile) {
-        Exporter.logger.info("Rendering relic popup image to " + imageFile);
+    private void exportPopupImageToFile() {
+        Exporter.logger.info("Rendering relic popup image to " + this.popupImage.absolute);
         // See SingleRelicViewPopup.generateRarityLabel and generateFrameImg and renderRarity
         final float DESC_LINE_SPACING = 30.0f * Settings.scale;
         final float DESC_LINE_WIDTH = 418.0f * Settings.scale;
@@ -145,7 +141,7 @@ class RelicExportData implements Comparable<RelicExportData> {
         float y = (Settings.HEIGHT - height) * 0.5f - 20.0f;
         float xpadding = 0.0f;
         float ypadding = 0.0f;
-        CardExportData.renderSpriteBatchToPixmap(x-xpadding, y-ypadding, width+2*xpadding, height+2*ypadding, 1.0f, (SpriteBatch sb) -> {
+        ExportHelper.renderSpriteBatchToPixmap(x-xpadding, y-ypadding, width+2*xpadding, height+2*ypadding, 1.0f, (SpriteBatch sb) -> {
             // renderPopupBg
             sb.setColor(Color.WHITE);
             sb.draw(ImageMaster.RELIC_POPUP, (float)Settings.WIDTH / 2.0f - 960.0f, (float)Settings.HEIGHT / 2.0f - 540.0f, 960.0f, 540.0f, 1920.0f, 1080.0f, Settings.scale, Settings.scale, 0.0f, 0, 0, 1920, 1080, false, false);
@@ -169,16 +165,16 @@ class RelicExportData implements Comparable<RelicExportData> {
             // renderQuote
             FontHelper.renderWrappedText(sb, FontHelper.SRV_quoteFont, this.relic.flavorText, (float)Settings.WIDTH / 2.0f, (float)Settings.HEIGHT / 2.0f - 310.0f * Settings.scale, DESC_LINE_WIDTH, Settings.CREAM_COLOR, 1.0f);
         }, (Pixmap pixmap) -> {
-            PixmapIO.writePNG(Gdx.files.local(imageFile), pixmap);
-            Pixmap smallPixmap = CardExportData.resizePixmap(pixmap, Math.round(width/2), Math.round(height/2));
-            PixmapIO.writePNG(Gdx.files.local(smallImageFile), smallPixmap);
+            PixmapIO.writePNG(Gdx.files.local(this.popupImage.absolute), pixmap);
+            Pixmap smallPixmap = ExportHelper.resizePixmap(pixmap, Math.round(width/2), Math.round(height/2));
+            PixmapIO.writePNG(Gdx.files.local(this.smallPopupImage.absolute), smallPixmap);
             smallPixmap.dispose();
         });
     }
 
     // Note: We can't use SingleRelicViewPopup, because that plays a sound.
-    private void exportImageToFileWithAnoyingSound(String imageFile) {
-        Exporter.logger.info("Rendering relic image to " + imageFile);
+    private void exportImageToFileWithAnoyingSound() {
+        Exporter.logger.info("Rendering relic image to " + this.image.absolute);
         // Make relic seen
         SingleRelicViewPopup popup = CardCrawlGame.relicPopup;
         popup.open(relic);
@@ -189,7 +185,7 @@ class RelicExportData implements Comparable<RelicExportData> {
         float y = (Settings.HEIGHT - height) * 0.5f;
         float xpadding = 0.0f;
         float ypadding = 0.0f;
-        CardExportData.renderSpriteBatchToPNG(x-xpadding, y-ypadding, width+2*xpadding, height+2*ypadding, 1.0f, imageFile, (SpriteBatch sb) -> {
+        ExportHelper.renderSpriteBatchToPNG(x-xpadding, y-ypadding, width+2*xpadding, height+2*ypadding, 1.0f, this.image.absolute, (SpriteBatch sb) -> {
             popup.render(sb);
         });
         popup.close();
@@ -225,25 +221,25 @@ class RelicExportData implements Comparable<RelicExportData> {
     }
 
 
-    public static ArrayList<RelicExportData> exportAllRelics(String imagedir) {
-        Exporter.mkdir(imagedir);
+    public static ArrayList<RelicExportData> exportAllRelics(ExportHelper export) {
         ArrayList<RelicExportData> relics = new ArrayList<>();
+		@SuppressWarnings("unchecked")
         HashMap<String,AbstractRelic> sharedRelics = (HashMap<String,AbstractRelic>)ReflectionHacks.getPrivateStatic(RelicLibrary.class, "sharedRelics");
         for (AbstractRelic relic : sharedRelics.values()) {
-            relics.add(new RelicExportData(relic, null, imagedir));
+            relics.add(new RelicExportData(export, relic, null));
         }
         for (AbstractRelic relic : RelicLibrary.redList) {
-            relics.add(new RelicExportData(relic, AbstractCard.CardColor.RED, imagedir));
+            relics.add(new RelicExportData(export, relic, AbstractCard.CardColor.RED));
         }
         for (AbstractRelic relic : RelicLibrary.greenList) {
-            relics.add(new RelicExportData(relic, AbstractCard.CardColor.GREEN, imagedir));
+            relics.add(new RelicExportData(export, relic, AbstractCard.CardColor.GREEN));
         }
         for (AbstractRelic relic : RelicLibrary.blueList) {
-            relics.add(new RelicExportData(relic, AbstractCard.CardColor.BLUE, imagedir));
+            relics.add(new RelicExportData(export, relic, AbstractCard.CardColor.BLUE));
         }
         for (HashMap.Entry<AbstractCard.CardColor,HashMap<String,AbstractRelic>> entry : BaseMod.getAllCustomRelics().entrySet()) {
             for (AbstractRelic relic : entry.getValue().values()) {
-                relics.add(new RelicExportData(relic, entry.getKey(), imagedir));
+                relics.add(new RelicExportData(export, relic, entry.getKey()));
             }
         }
         Collections.sort(relics);

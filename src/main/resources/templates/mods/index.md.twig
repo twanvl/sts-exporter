@@ -1,0 +1,21 @@
+{% if mod.cards %}
+## Cards
+
+{% include 'classpath:../cards.md.twig' %}
+{% endif %}
+
+{% if mod.creatures %}
+## Potions
+
+{% include 'classpath:../potions.md.twig' %}
+{% endif %}
+
+{% if mod.relics %}
+## Relics
+
+{% include 'classpath:../relics.md.twig' %}
+{% endif %}
+
+{% if mod.creatures %}
+{% include 'classpath:../creatures.md.twig' %}
+{% endif %}

@@ -4,11 +4,10 @@ A simple mod for Slay the Spire that can export card images, relics, potions, an
 
 ## How to use it
 
-Simply load the mod with ModTheSpire. Make sure that Spire Exporter is the last item on the list, otherwise it will miss items from other mods.
+Simply load the mod with ModTheSpire. Then click on 'mods' -> 'Spire Exporter' -> 'config' -> 'Export now'.
+This creates a directory "export" that contains the exported images and data in HTML format.
 
-At the start of the game, a directory "export" will be created that contains the exported images in a HTML format.
-
-The size of the exported images is based on the resolution of the game. So for best results, set Slay the Spire to 1920x1080.
+By default only modded items will be exported.
 
 ## Changing the export format
 

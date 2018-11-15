@@ -1,0 +1,14 @@
+<table class="sortable">
+  <tr>
+    <th>Name</th>
+    <th>Image</th>{% if listmod %}
+    <th>Mod</th>{% endif %}
+  </tr>
+  {% for creature in creatures %}
+  <tr>
+    <td>{{ creature.name }}</td>
+    <td><img src="{{ creature.image.relativeTo(dir) }}"></td>{% if listmod %}
+    <td><a href="{{mod.id}}/index.html">{{ creature.mod.modName }}</a></td>{% endif %}
+  </tr>
+  {% endfor %}
+</table>

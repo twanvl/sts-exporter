@@ -1,5 +1,0 @@
-| Name | Image | Upgraded image | Rarity | Type | Cost | Description |
-| ---- | ----- | -------------- | ------ | ---- | ---- | ----------- |
-{% for card in cards
-%}| {{ card.name }} | ![]({{ card.relSmallImage }}) | ![]({{ card.upgrade.relSmallImage }}) | {{ card.rarity }} | {{ card.type }} | {{ card.costAndUpgrade }} | {{ card.textAndUpgrade }} |
-{% endfor %}

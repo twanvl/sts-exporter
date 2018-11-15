@@ -1,42 +1,46 @@
 package sts_exporter;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Collections;
 
-import com.evacipated.cardcrawl.modthespire.Loader;
-import com.evacipated.cardcrawl.modthespire.ModInfo;
+import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.cards.AbstractCard;
-import com.megacrit.cardcrawl.helpers.CardLibrary;
+import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.helpers.FontHelper;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.potions.AbstractPotion;
 import com.megacrit.cardcrawl.relics.AbstractRelic;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jtwig.JtwigModel;
-import org.jtwig.JtwigTemplate;
 
 import basemod.BaseMod;
+import basemod.ModButton;
+import basemod.ModLabel;
+import basemod.ModLabeledToggleButton;
+import basemod.ModPanel;
 import basemod.interfaces.PostInitializeSubscriber;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.NotFoundException;
 
 @SpireInitializer
 public class Exporter implements PostInitializeSubscriber {
     public static final Logger logger = LogManager.getLogger(Exporter.class.getName());
-    private static final String[] colorTemplates = {"cardlist.html","cardlist.md","cardlist.wiki","wiki-card-data.txt"};
-    private static final String[] indexTemplates = {"index.html","creatures.html","potions.html","relics.html","creatures.md","potions.md","relics.md","style.css"};
 
-    private static ArrayList<ModExportData> mods = new ArrayList<>();
+    SpireConfig config;
+    public static final String CONFIG_EXPORT_AT_START = "export_at_startup";
+    public static final String CONFIG_INCLUDE_BASE_GAME = "include_base_game";
+    public static final String CONFIG_EXPORT_DIR = "export_dir";
 
     public Exporter() {
+        // config
+        try {
+            config = new SpireConfig("Exporter", "config");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (!config.has(CONFIG_EXPORT_AT_START)) config.setBool(CONFIG_EXPORT_AT_START, false);
+        if (!config.has(CONFIG_INCLUDE_BASE_GAME)) config.setBool(CONFIG_INCLUDE_BASE_GAME, false);
+        if (!config.has(CONFIG_EXPORT_DIR)) config.setString(CONFIG_EXPORT_DIR, "export");
+        // initialize
         BaseMod.subscribe(this);
     }
 
@@ -46,161 +50,59 @@ public class Exporter implements PostInitializeSubscriber {
 
     @Override
     public void receivePostInitialize() {
+        ModPanel settingsPanel = new ModPanel();
+        settingsPanel.addUIElement(new ModLabeledToggleButton("Run exporter at startup", 360, 700, Settings.CREAM_COLOR, FontHelper.charDescFont, config.getBool(CONFIG_EXPORT_AT_START), settingsPanel, l -> {}, button -> {
+            config.setBool(CONFIG_EXPORT_AT_START, button.enabled);
+            saveConfig();
+        }));
+        settingsPanel.addUIElement(new ModLabeledToggleButton("Export items from the base game", 360, 650, Settings.CREAM_COLOR, FontHelper.charDescFont, config.getBool(CONFIG_INCLUDE_BASE_GAME), settingsPanel, l -> {}, button -> {
+            config.setBool(CONFIG_INCLUDE_BASE_GAME, button.enabled);
+            saveConfig();
+        }));
+        settingsPanel.addUIElement(new ModButton(350, 200, settingsPanel, button -> {
+            exportAll();
+        }));
+        settingsPanel.addUIElement(new ModLabel("Export now", 350+125, 200+50, settingsPanel, l -> {}));
+        BaseMod.registerModBadge(ImageMaster.loadImage("img/ExporterBadge.png"), "Spire Exporter", "twanvl", "", settingsPanel);
+
+        if (config.getBool(CONFIG_EXPORT_AT_START)) {
+            exportAll();
+        }
+    }
+
+    void saveConfig() {
+        try {
+            config.save();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void exportAll() {
         // set scale to 1.0
-        //float oldscale = Settings.scale;
-        //Settings.scale = 1.0f;
+        float oldScale = Settings.scale;
+        int oldWidth = Settings.WIDTH, oldHeight = Settings.HEIGHT;
+        Settings.scale = 1.0f;
+        Settings.WIDTH = 1920;
+        Settings.HEIGHT = 1080;
+        if (oldScale != 1.0f) {
+            FontHelper.initialize(); // Re initialize fonts, because that depends on Settings.scale
+        }
         // Run exporter
         try {
-            initModList();
-            exportAll("export");
+            ExportHelper export = new ExportHelper(config);
+            export.collectAll();
+            export.exportAll();
         } catch (Exception e) {
             logger.error("Error during export", e);
         }
-        //Settings.scale = oldscale;
-    }
-
-    static void mkdir(String dir) {
-        File f = new File(dir);
-        f.mkdir();
-    }
-
-    static String makeFilename(String id) {
-        id = id.replaceAll(":","-");
-        id = id.replace("+","Plus");
-        id = id.replace("*","Star");
-        return id.replaceAll("[\\s\\\\/:*?\"\'<>|+%]", "");
-    }
-
-    public static void exportAll(String outdir) {
-        logger.info("Exporting all cards to " + outdir);
-        mkdir(outdir);
-        // colors and cards
-        ArrayList<String> colors = new ArrayList<>();
-        for (AbstractCard.CardColor color : AbstractCard.CardColor.values()) {
-            exportAllCards(color, outdir + "/" + color);
-            colors.add(color.toString());
+        // Restore scale
+        Settings.scale = oldScale;
+        Settings.WIDTH = oldWidth;
+        Settings.HEIGHT = oldHeight;
+        if (oldScale != 1.0f) {
+            FontHelper.initialize();
         }
-
-        // monsters
-        logger.info("Exporting creatures");
-        ArrayList<CreatureExportData> creatures = CreatureExportData.exportAllCreatures(outdir + "/creatures");
-
-        // relics
-        logger.info("Exporting relics");
-        ArrayList<RelicExportData> relics = RelicExportData.exportAllRelics(outdir + "/relics");
-
-        // potions
-        logger.info("Exporting potions");
-        ArrayList<PotionExportData> potions = PotionExportData.exportAllPotions(outdir + "/potions");
-
-        // mods
-        exportAllMods(outdir + "/mods");
-
-        // write index files
-        JtwigModel model = JtwigModel.newModel();
-        model.with("colors",colors);
-        model.with("relics",relics);
-        model.with("creatures",creatures);
-        model.with("potions",potions);
-        model.with("mods",mods);
-        writeTwigTemplates(model, indexTemplates, outdir);
-        logger.info("Done exporting.");
-    }
-
-    public static void exportAllCards(AbstractCard.CardColor color, String outdir) {
-        AbstractList<AbstractCard> cards = CardLibrary.getCardList(CardLibrary.LibraryType.valueOf(color.name()));
-        exportAllCards(color, cards, outdir);
-    }
-    public static void exportAllCards(AbstractCard.CardColor color, AbstractList<AbstractCard> cards, String outdir) {
-        logger.info("Exporting " + color + " to " + outdir);
-        mkdir(outdir);
-        String imagedir = outdir + "/card-images";
-        String smallImagedir = outdir + "/small-card-images";
-        mkdir(imagedir);
-        mkdir(smallImagedir);
-        // Create a data structure for all the cards.
-        // At the same time, export all images
-        ArrayList<CardExportData> cardData = new ArrayList<>();
-        for (AbstractCard c : cards) {
-            cardData.add(new CardExportData(c.makeCopy(), imagedir, smallImagedir));
-        }
-        Collections.sort(cardData);
-        // Export HTML file with all cards
-        JtwigModel model = JtwigModel.newModel();
-        model.with("selection", colorName(color));
-        model.with("cards", cardData);
-        writeTwigTemplates(model, colorTemplates, outdir);
-    }
-
-    static void exportAllMods(String modsdir) {
-        mkdir(modsdir);
-        for (ModExportData mod : mods) {
-            Collections.sort(mod.cards);
-            Collections.sort(mod.relics);
-            Collections.sort(mod.creatures);
-            Collections.sort(mod.potions);
-            JtwigModel model = JtwigModel.newModel();
-            model.with("mod", mod);
-            model.with("cards", mod.cards);
-            model.with("relics", mod.relics);
-            model.with("creatures", mod.creatures);
-            model.with("potions", mod.potions);
-            model.with("selection", mod.name);
-            writeTwigTemplate(model, "templates/mod.html.twig", modsdir + "/" + mod.id + ".html");
-            writeTwigTemplate(model, "templates/mod.md.twig", modsdir + "/" + mod.id + ".md");
-        }
-    }
-
-    private static void writeTwigTemplates(JtwigModel model, String[] templateNames, String outdir) {
-        for (String templateName : templateNames) {
-            writeTwigTemplate(model, "templates/" + templateName + ".twig", outdir + "/" + templateName);
-        }
-    }
-
-    private static void writeTwigTemplate(JtwigModel model, String templateFile, String outFile) {
-        try {
-            logger.info("Writing " + outFile);
-            FileOutputStream stream = new FileOutputStream(outFile);
-            JtwigTemplate template = JtwigTemplate.classpathTemplate(templateFile);
-            template.render(model, stream);
-            stream.close();
-        } catch (IOException e) {
-            logger.error(e);
-        }
-    }
-
-    private static void initModList() {
-        mods.add(new ModExportData());
-        for (ModInfo modInfo : Loader.MODINFOS) {
-            mods.add(new ModExportData(modInfo));
-        }
-    }
-
-    public static ModExportData findMod(Class<?> cls) {
-        // Inspired by BaseMod.patches.whatmod.WhatMod
-        URL locationURL = cls.getProtectionDomain().getCodeSource().getLocation();
-
-        if (locationURL == null) {
-            try {
-                ClassPool pool = Loader.getClassPool();
-                CtClass ctCls = pool.get(cls.getName());
-                String url = ctCls.getURL().getFile();
-                int i = url.lastIndexOf('!');
-                url = url.substring(0, i);
-                locationURL = new URL(url);
-            } catch (NotFoundException | MalformedURLException e) {
-                e.printStackTrace();
-            }
-        }
-        if (locationURL == null) {
-            return mods.get(0);
-        }
-        for (ModExportData mod : mods) {
-            if (locationURL.equals(mod.url)) {
-                return mod;
-            }
-        }
-        return mods.get(0);
     }
 
     public static String typeString(AbstractCard.CardType type) {
@@ -244,19 +146,18 @@ public class Exporter implements PostInitializeSubscriber {
     }
 
     public static String rarityName(AbstractCard.CardRarity rarity) {
-        return toTitleCase(rarity.toString()); // TODO: localize
+        return toTitleCase(rarity.toString()); // TODO: localize?
     }
 
     public static String rarityName(AbstractPotion.PotionRarity rarity) {
-        return toTitleCase(rarity.toString()); // TODO: localize
+        return toTitleCase(rarity.toString()); // TODO: localize?
     }
 
     public static String tierName(AbstractRelic.RelicTier tier) {
-        return toTitleCase(tier.toString()); // TODO: localize
+        return toTitleCase(tier.toString()); // TODO: localize?
     }
 
     public static String colorName(AbstractCard.CardColor color) {
-        return toTitleCase(color.toString()); // TODO: localize
+        return toTitleCase(color.toString()); // TODO: localize?
     }
-
 }
