@@ -36,7 +36,7 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
         this.name = creature.name;
         this.mod = export.findMod(creature.getClass());
         this.mod.creatures.add(this);
-        this.image = export.exportPath(this.mod, "creatures", creature.id != null ? creature.id : creature.getClass().getSimpleName(), "png");
+        this.image = export.exportPath(this.mod, "creatures", creature.id != null ? creature.id : creature.getClass().getSimpleName(), ".png");
     }
 
     public void exportImages() {
