@@ -118,6 +118,9 @@ class ExportHelper {
     }
 
     ExportPath exportPath(ModExportData mod, String dir, String id, String suffix) {
+        if (id.startsWith(mod.id+":")) {
+            id = id.substring(mod.id.length() + 1); // strip mod ids
+        }
         String file = makeFilename(id) + suffix;
         return new ExportPath(this.dir, mod.id, dir, file);
     }
