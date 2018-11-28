@@ -1,3 +1,6 @@
+### v0.4.2
+* Added Json export
+
 ### v0.4.1
 * Fix file extension of creature images (#2)
 * Avoid redundant mod ids in filenames

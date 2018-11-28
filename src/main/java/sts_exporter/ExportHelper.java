@@ -21,8 +21,11 @@ import com.evacipated.cardcrawl.modthespire.ModInfo;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
 import com.megacrit.cardcrawl.cards.AbstractCard.CardColor;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
+import org.jtwig.environment.EnvironmentConfiguration;
+import org.jtwig.environment.EnvironmentConfigurationBuilder;
 
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -90,7 +93,7 @@ class ExportHelper {
 
     private static final String[] colorTemplates = {"cards.html","cards.md","cards.wiki","wiki-card-data.txt","style.css"};
     private static final String[] indexTemplates = {"index.html","wiki-card-data.txt"};
-    private static final String[] commonTemplates = {"creatures.html","potions.html","relics.html","cards.html","creatures.md","potions.md","relics.md","cards.md","style.css"};
+    private static final String[] commonTemplates = {"creatures.html","potions.html","relics.html","cards.html","creatures.md","potions.md","relics.md","cards.md","items.json","style.css"};
     private static final String[] modTemplates = {"index.html","index.md"};
 
     void exportAllTemplates() {
@@ -194,6 +197,16 @@ class ExportHelper {
         return null;
     }
 
+    private static ArrayList<CardExportData> withUpgrades(ArrayList<CardExportData> cards) {
+        ArrayList<CardExportData> all = new ArrayList<>();
+        all.addAll(cards);
+        for (CardExportData card : cards) {
+            if (card.upgrade != null) all.add(card.upgrade);
+        }
+        Collections.sort(all);
+        return all;
+    }
+
     // ----------------------------------------------------------------------------
     // Image exporting
     // ----------------------------------------------------------------------------
@@ -248,6 +261,15 @@ class ExportHelper {
     // Template exporting
     // ----------------------------------------------------------------------------
 
+    private static EnvironmentConfiguration twigConfiguration = EnvironmentConfigurationBuilder
+        .configuration()
+            .escape()
+                .engines()
+                    .add("json", (input) -> StringEscapeUtils.escapeJava(input)) // close enough
+                .and()
+            .and()
+        .build();
+
     private static void writeTwigTemplates(JtwigModel model, String indir, String outdir, String[] templateNames) {
         new File(outdir).mkdirs();
         for (String templateName : templateNames) {
@@ -259,7 +281,7 @@ class ExportHelper {
         try {
             Exporter.logger.info("Writing " + outFile);
             FileOutputStream stream = new FileOutputStream(outFile);
-            JtwigTemplate template = JtwigTemplate.classpathTemplate(templateFile);
+            JtwigTemplate template = JtwigTemplate.classpathTemplate(templateFile, twigConfiguration);
             template.render(model, stream);
             stream.close();
         } catch (IOException e) {
@@ -278,6 +300,7 @@ class ExportHelper {
         model.with("creatures",mod.creatures);
         model.with("potions",mod.potions);
         model.with("cards",mod.cards);
+        model.with("cardsAndUpgrades",withUpgrades(mod.cards));
         return model;
     }
 
@@ -290,6 +313,7 @@ class ExportHelper {
         model.with("color",color);
         model.with("relics",color.relics);
         model.with("cards",color.cards);
+        model.with("cardsAndUpgrades",withUpgrades(color.cards));
         return model;
     }
 
@@ -304,6 +328,7 @@ class ExportHelper {
         model.with("creatures",this.creatures);
         model.with("potions",this.potions);
         model.with("cards",this.cards);
+        model.with("cardsAndUpgrades",withUpgrades(this.cards));
         model.with("mods",this.mods);
         return model;
     }

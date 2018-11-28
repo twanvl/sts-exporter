@@ -1,0 +1,36 @@
+{
+  "cards": [{% for card in cardsAndUpgrades %}
+    {
+      "name": "{{ card.name | escape('json') }}",
+      "rarity": "{{ card.rarity | escape('json') }}",
+      "type": "{{ card.type | escape('json') }}",
+      "cost": "{{ card.cost | escape('json') }}",
+      "description": "{{ card.text | escape('json') }}"{% if listmod %},
+      "mod": "{{ card.mod.modName | escape('json') }}"{% endif %}
+    }{% if not(loop.last) %},{% endif %}{% endfor %}
+  ],
+  "relics": [{% for relic in relics %}
+    {
+      "name": "{{ relic.name | escape('json') }}",
+      "tier": "{{ relic.tier | escape('json') }}",
+      "pool": "{{ relic.pool | escape('json') }}",
+      "description": "{{ relic.description | escape('json') }}",
+      "flavorText": "{{ relic.flavorText }}"{% if listmod %},
+      "mod": "{{ relic.mod.modName | escape('json') }}"{% endif %}
+    }{% if not(loop.last) %},{% endif %}{% endfor %}
+  ],
+  "potions": [{% for potion in potions %}
+    {
+      "name": "{{ potion.name | escape('json') }}",
+      "rarity": "{{ potion.rarity | escape('json') }}",
+      "description": "{{ potion.description | escape('json') }}"{% if listmod %},
+      "mod": "{{ potion.mod.modName | escape('json') }}"{% endif %}
+    }{% if not(loop.last) %},{% endif %}{% endfor %}
+  ],
+  "creatures": [{% for creature in creatures %}
+    {
+      "name": "{{ creature.name | escape('json') }}"{% if listmod %},
+      "mod": "{{ creature.mod.modName | escape('json') }}"{% endif %}
+    }{% if not(loop.last) %},{% endif %}{% endfor %}
+  ]
+}
