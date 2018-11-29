@@ -32,7 +32,7 @@ class RelicExportData implements Comparable<RelicExportData> {
     public ExportPath image;
     public ExportPath popupImage;
     public ExportPath smallPopupImage;
-    public String name, description, descriptionHTML, flavorText;
+    public String name, description, descriptionHTML, descriptionPlain, flavorText;
 
     RelicExportData(ExportHelper export, AbstractRelic relic, AbstractCard.CardColor pool) {
         this.relic = relic;
@@ -41,6 +41,7 @@ class RelicExportData implements Comparable<RelicExportData> {
         this.name = relic.name;
         this.description = relic.description;
         this.descriptionHTML = smartTextToHTML(relic.description);
+        this.descriptionPlain = smartTextToPlain(relic.description);
         this.flavorText = relic.flavorText;
         this.tier = Exporter.tierName(relic.tier);
         this.poolColor = pool;
@@ -220,10 +221,35 @@ class RelicExportData implements Comparable<RelicExportData> {
         return out.toString();
     }
 
+    public static String smartTextToPlain(String string) {
+        if (string == null) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder();
+        Scanner s = new Scanner(string);
+        while (s.hasNext()) {
+            String word = s.next();
+            if (word.equals("NL")) {
+                out.append("\n");
+            } else if (word.equals("TAB")) {
+                out.append("\t");
+                continue;
+            } else if (word.charAt(0) == '#') {
+                out.append(word.substring(2, word.length()));
+                out.append(" ");
+            } else {
+                out.append(word);
+                out.append(" ");
+            }
+        }
+        s.close();
+        return out.toString();
+    }
+
 
     public static ArrayList<RelicExportData> exportAllRelics(ExportHelper export) {
         ArrayList<RelicExportData> relics = new ArrayList<>();
-		@SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
         HashMap<String,AbstractRelic> sharedRelics = (HashMap<String,AbstractRelic>)ReflectionHacks.getPrivateStatic(RelicLibrary.class, "sharedRelics");
         for (AbstractRelic relic : sharedRelics.values()) {
             relics.add(new RelicExportData(export, relic, null));

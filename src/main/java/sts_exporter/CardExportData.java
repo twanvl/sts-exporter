@@ -70,7 +70,7 @@ public class CardExportData implements Comparable<CardExportData> {
                         .replace("!B!", String.valueOf(block))
                         .replace("!D!", String.valueOf(damage))
                         .replace("!M!", String.valueOf(magicNumber))
-                        .replace(" NL ", " ");
+                        .replace(" NL ", "\n");
         if (upgrade == null) {
             this.textAndUpgrade = this.text;
         } else {

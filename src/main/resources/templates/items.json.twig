@@ -2,6 +2,7 @@
   "cards": [{% for card in cardsAndUpgrades %}
     {
       "name": "{{ card.name | escape('json') }}",
+      "color": "{{ card.color | escape('json') }}",
       "rarity": "{{ card.rarity | escape('json') }}",
       "type": "{{ card.type | escape('json') }}",
       "cost": "{{ card.cost | escape('json') }}",
@@ -14,7 +15,7 @@
       "name": "{{ relic.name | escape('json') }}",
       "tier": "{{ relic.tier | escape('json') }}",
       "pool": "{{ relic.pool | escape('json') }}",
-      "description": "{{ relic.description | escape('json') }}",
+      "description": "{{ relic.descriptionPlain | escape('json') }}",
       "flavorText": "{{ relic.flavorText }}"{% if listmod %},
       "mod": "{{ relic.mod.modName | escape('json') }}"{% endif %}
     }{% if not(loop.last) %},{% endif %}{% endfor %}
