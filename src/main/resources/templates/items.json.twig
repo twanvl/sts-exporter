@@ -16,7 +16,7 @@
       "tier": "{{ relic.tier | escape('json') }}",
       "pool": "{{ relic.pool | escape('json') }}",
       "description": "{{ relic.descriptionPlain | escape('json') }}",
-      "flavorText": "{{ relic.flavorText }}"{% if listmod %},
+      "flavorText": "{{ relic.flavorText | escape('json') }}"{% if listmod %},
       "mod": "{{ relic.mod.modName | escape('json') }}"{% endif %}
     }{% if not(loop.last) %},{% endif %}{% endfor %}
   ],
