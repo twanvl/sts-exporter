@@ -1,4 +1,16 @@
 {
+  {%- if mod and mod.info %}
+  "mod": {
+    "name": "{{ mod.name | escape('json') }}",
+    "version": "{{ mod.info.ModVersion | escape('json') }}",
+    "authors": [{% for author in mod.info.Authors %}"{{ author | escape('json') }}"{% if not(loop.last) %},{% endif %}{% endfor %}],
+    "credits": "{{ mod.info.Credits | escape('json') }}",
+    "description": "{{ mod.info.Description | escape('json') }}",
+    "mts_version": "{{ mod.info.MTS_Version | escape('json') }}",
+    "sts_version": "{{ mod.info.STS_Version | escape('json') }}",
+    "dependencies": [{% for x in mod.info.Dependencies %}"{{ x | escape('json') }}"{% if not(loop.last) %},{% endif %}{% endfor %}],
+    "optional_dependencies": [{% for x in mod.info.OptionalDependencies %}"{{ x | escape('json') }}"{% if not(loop.last) %},{% endif %}{% endfor %}]
+  },{% endif %}
   "cards": [{% for card in cardsAndUpgrades %}
     {
       "name": "{{ card.name | escape('json') }}",
