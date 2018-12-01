@@ -62,6 +62,11 @@ class ExportHelper {
                 relics.addAll(mod.relics);
                 creatures.addAll(mod.creatures);
                 potions.addAll(mod.potions);
+                // sort
+                Collections.sort(mod.cards);
+                Collections.sort(mod.relics);
+                Collections.sort(mod.creatures);
+                Collections.sort(mod.potions);
             }
         }
         Collections.sort(this.cards);
