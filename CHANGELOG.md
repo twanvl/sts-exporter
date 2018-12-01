@@ -3,6 +3,7 @@
 * Sort cards and other items in the per mod export
 * Add color markup support for relic descriptions and flavor text
 * Correctly use UTF8 encoding for input and output files
+* Fix export of replay the spire creatures
 
 ### v0.4.1
 * Fix file extension of creature images (#2)

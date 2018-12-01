@@ -121,6 +121,7 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
         AbstractDungeon.currMapNode = new MapRoomNode(0, -1);
         AbstractDungeon.currMapNode.room = new EmptyRoom();
         AbstractDungeon.currMapNode.room.monsters = new MonsterGroup(new AbstractMonster[0]); // needed to render monsters
+        AbstractDungeon.id = ""; // for a Replay the Spire creature
 
         // Now get all monsters
         // There is unfortunately no list of all monsters in the game. The best we can do is to use MonsterHelper.getEncounter
