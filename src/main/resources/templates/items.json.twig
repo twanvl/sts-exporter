@@ -42,7 +42,10 @@
   ],
   "creatures": [{% for creature in creatures %}
     {
-      "name": "{{ creature.name | escape('json') }}"{% if listmod %},
+      "name": "{{ creature.name | escape('json') }}",
+      "type": "{{ creature.type | escape('json') }}",
+      "minHP": "{{ creature.minHP | escape('json') }}",
+      "maxHP": "{{ creature.maxHP | escape('json') }}"{% if listmod %},
       "mod": "{{ creature.mod.modName | escape('json') }}"{% endif %}
     }{% if not(loop.last) %},{% endif %}{% endfor %}
   ],
