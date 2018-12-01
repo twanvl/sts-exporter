@@ -13,7 +13,8 @@ class PotionExportData implements Comparable<PotionExportData> {
     public AbstractPotion potion;
     public ModExportData mod;
     public ExportPath image;
-    public String id, name, rarity, description, descriptionHTML;
+    public String id, name, rarity;
+    public String description, descriptionHTML, descriptionPlain;
     public String playerClass;
 
     PotionExportData(ExportHelper export, AbstractPotion potion, AbstractPlayer.PlayerClass cls) {
@@ -23,7 +24,8 @@ class PotionExportData implements Comparable<PotionExportData> {
         this.id = potion.ID;
         this.name = potion.name;
         this.description = potion.description;
-        this.descriptionHTML = RelicExportData.smartTextToHTML(potion.description);
+        this.descriptionHTML = RelicExportData.smartTextToHTML(potion.description,true,true);
+        this.descriptionPlain = RelicExportData.smartTextToPlain(potion.description,true,true);
         this.rarity = Exporter.rarityName(potion.rarity);
         this.playerClass = playerClass == null ? "" : playerClass.toString();
         this.image = export.exportPath(this.mod, "potions", this.name, ".png");

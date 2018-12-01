@@ -16,7 +16,7 @@
       "tier": "{{ relic.tier | escape('json') }}",
       "pool": "{{ relic.pool | escape('json') }}",
       "description": "{{ relic.descriptionPlain | escape('json') }}",
-      "flavorText": "{{ relic.flavorText | escape('json') }}"{% if listmod %},
+      "flavorText": "{{ relic.flavorTextPlain | escape('json') }}"{% if listmod %},
       "mod": "{{ relic.mod.modName | escape('json') }}"{% endif %}
     }{% if not(loop.last) %},{% endif %}{% endfor %}
   ],
@@ -24,7 +24,7 @@
     {
       "name": "{{ potion.name | escape('json') }}",
       "rarity": "{{ potion.rarity | escape('json') }}",
-      "description": "{{ potion.description | escape('json') }}"{% if listmod %},
+      "description": "{{ potion.descriptionPlain | escape('json') }}"{% if listmod %},
       "mod": "{{ potion.mod.modName | escape('json') }}"{% endif %}
     }{% if not(loop.last) %},{% endif %}{% endfor %}
   ],

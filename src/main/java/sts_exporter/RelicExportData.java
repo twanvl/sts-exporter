@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Colors;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
@@ -32,7 +33,9 @@ class RelicExportData implements Comparable<RelicExportData> {
     public ExportPath image;
     public ExportPath popupImage;
     public ExportPath smallPopupImage;
-    public String name, description, descriptionHTML, descriptionPlain, flavorText;
+    public String name;
+    public String description, descriptionHTML, descriptionPlain;
+    public String flavorText, flavorTextHTML, flavorTextPlain;
 
     RelicExportData(ExportHelper export, AbstractRelic relic, AbstractCard.CardColor pool) {
         this.relic = relic;
@@ -40,9 +43,11 @@ class RelicExportData implements Comparable<RelicExportData> {
         this.mod.relics.add(this);
         this.name = relic.name;
         this.description = relic.description;
-        this.descriptionHTML = smartTextToHTML(relic.description);
-        this.descriptionPlain = smartTextToPlain(relic.description);
+        this.descriptionHTML = smartTextToHTML(relic.description,true,true);
+        this.descriptionPlain = smartTextToPlain(relic.description,true,true);
         this.flavorText = relic.flavorText;
+        this.flavorTextHTML = smartTextToHTML(relic.flavorText,false,true);;
+        this.flavorTextPlain = smartTextToPlain(relic.flavorText,false,true);;
         this.tier = Exporter.tierName(relic.tier);
         this.poolColor = pool;
         this.pool = pool == null ? "" : Exporter.colorName(pool);
@@ -192,57 +197,135 @@ class RelicExportData implements Comparable<RelicExportData> {
         popup.close();
     }
 
-    public static String smartTextToHTML(String string) {
-        if (string == null) {
-            return "";
-        }
-        StringBuilder out = new StringBuilder();
-        Scanner s = new Scanner(string);
-        while (s.hasNext()) {
-            String word = s.next();
-            if (word.equals("NL")) {
-                out.append("<br>\n");
-            } else if (word.equals("TAB")) {
-                out.append("\t");
-                continue;
-            } else if (word.charAt(0) == '#') {
-                out.append("<span class=\"color-");
-                out.append(word.charAt(1));
-                out.append("\">");
-                out.append(word.substring(2, word.length()));
-                out.append("</span> ");
-            } else {
-                // TODO: do something with orbs?
-                out.append(word);
-                out.append(" ");
-            }
-        }
-        s.close();
-        return out.toString();
+    public static String smartTextToHTML(String string, boolean smart, boolean markup) {
+        return parseSmartText(string,smart,markup,true);
     }
 
-    public static String smartTextToPlain(String string) {
-        if (string == null) {
-            return "";
-        }
+    public static String smartTextToPlain(String string, boolean smart, boolean markup) {
+        return parseSmartText(string,smart,markup,false);
+    }
+
+    // Parse "smart text" from FontHelper into plain text or html
+    // @param smart FontHelper.renderSmartText escapes
+    // @param markup GlyphLayout color markup
+    // @param html HTML or plain text output
+    public static String parseSmartText(String string, boolean smart, boolean markup, boolean html) {
+        if (string == null) return "";
         StringBuilder out = new StringBuilder();
-        Scanner s = new Scanner(string);
-        while (s.hasNext()) {
-            String word = s.next();
-            if (word.equals("NL")) {
-                out.append("\n");
-            } else if (word.equals("TAB")) {
-                out.append("\t");
-                continue;
-            } else if (word.charAt(0) == '#') {
-                out.append(word.substring(2, word.length()));
-                out.append(" ");
+        boolean space = false; // should we insert a space?
+        boolean wordStart = true;
+        int wordTags = 0; // number of tags that close at the end of the word
+        int openTags = 0;
+        for (int pos = 0; pos < string.length();) {
+            char c = string.charAt(pos);
+            if (c == ' ') {
+                while (wordTags > 0) {
+                    wordTags--; openTags--;
+                    if (html) out.append("</span>");
+                }
+                pos++;
+                wordStart = true;
+                space = true;
+            } else if (c == '\n' || c == '\t') {
+                while (wordTags > 0) {
+                    wordTags--; openTags--;
+                    if (html) out.append("</span>");
+                }
+                pos++;
+                wordStart = true;
+                space = false;
+            } else if (smart && wordStart && string.startsWith("NL ",pos)) {
+                out.append('\n');
+                pos += 3;
+                space = false;
+            } else if (smart && wordStart && string.startsWith("TAB ",pos)) {
+                out.append('\t');
+                pos += 4;
+                space = false;
+            } else if (smart && wordStart && c == '#' && pos+1 < string.length()) {
+                if (space) {
+                    out.append(' ');
+                    space = false;
+                }
+                if (html) {
+                    out.append("<span class=\"color-");
+                    out.append(string.charAt(pos+1));
+                    out.append("\">");
+                }
+                pos += 2;
+                openTags++;
+                wordTags++;
+            } else if (markup && c == '[' && pos+1 < string.length() && string.charAt(pos+1) == '[') {
+                // escaped [
+                if (space) {
+                    out.append(' ');
+                    space = false;
+                }
+                wordStart = false;
+                out.append(c);
+                pos += 2;
+            } else if (markup && c == '[' && pos + 1 < string.length()) {
+                if (space) {
+                    out.append(' ');
+                    space = false;
+                }
+                int end = string.indexOf(']',pos);
+                if (end == -1 || (end == pos+1 && openTags == 0) || (end == pos+2)) {
+                    // no closing bracket, or an energy orb like [R]
+                    wordStart = false;
+                    out.append(c);
+                    pos++;
+                } else if (end == pos+1) {
+                    if (openTags > 0) {
+                        if (wordTags > 0) wordTags--;
+                        openTags--;
+                        if (html) out.append("</span>");
+                    }
+                    pos = end + 1;
+                } else {
+                    String colorName = string.substring(pos+1,end);
+                    if (colorName.charAt(0) != '#' && Colors.get(colorName) == null) {
+                        // not a valid color, ignore
+                        wordStart = false;
+                        out.append(c);
+                        pos++;
+                    } else {
+                        if (html) {
+                            out.append("<span style=\"color:");
+                            out.append(colorName);
+                            out.append("\">");
+                        }
+                        openTags++;
+                        if (smart || wordTags > 0) {
+                            // note: FontHelper uses separate calls to GlyphLayout.setText, so each word is rendered independently, as a result all tags end at word boundaries
+                            // note2: If we are already using wordTags, then also close this tag at the end of the word
+                            wordTags++;
+                        }
+                        pos = end + 1;
+                    }
+                }
             } else {
-                out.append(word);
-                out.append(" ");
+                if (space) {
+                    out.append(' ');
+                    space = false;
+                }
+                wordStart = false;
+                if (html && c == '<') {
+                    out.append("&lt;");
+                } else if (html && c == '>') {
+                    out.append("&gt;");
+                } else if (html && c == '&') {
+                    out.append("&amp;");
+                } else {
+                    out.append(c);
+                }
+                pos++;
             }
         }
-        s.close();
+        while (openTags > 0) {
+            openTags--;
+            if (html) out.append("</span>");
+        }
         return out.toString();
     }
 

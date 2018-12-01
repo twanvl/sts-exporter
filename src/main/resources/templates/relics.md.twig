@@ -1,5 +1,5 @@
 | Image | Name | Rarity | Color | Description | Flavor |
 | ----- | ---- | ------ | ----- | ----------- | ------ |
 {% for relic in relics
-%}| ![]({{ relic.image.relativeTo(dir) }}) | {{ relic.name }} | {{ relic.tier }} | {{ relic.pool }} | {{ relic.description | replace({'\n':' '}) }} | {{ relic.flavorText | replace({'\n':' '}) }} |
+%}| ![]({{ relic.image.relativeTo(dir) }}) | {{ relic.name }} | {{ relic.tier }} | {{ relic.pool }} | {{ relic.description | replace({'\n':' '}) }} | {{ relic.flavorTextPlain | replace({'\n':' '}) }} |
 {% endfor %}
