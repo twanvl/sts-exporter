@@ -18,6 +18,7 @@ class ModExportData {
     public ArrayList<RelicExportData> relics = new ArrayList<>();
     public ArrayList<CreatureExportData> creatures = new ArrayList<>();
     public ArrayList<PotionExportData> potions = new ArrayList<>();
+    public ArrayList<KeywordExportData> keywords = new ArrayList<>();
     public static final String BASE_GAME_ID = "slay-the-spire";
 
     ModExportData(ExportHelper export, ModInfo info) {

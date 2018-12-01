@@ -56,6 +56,7 @@ class ExportHelper {
         CreatureExportData.exportAllCreatures(this);
         PotionExportData.exportAllPotions(this);
         this.colors = ColorExportData.exportAllColors(this);
+        this.keywords = KeywordExportData.exportAllKeywords(this);
         // collect only from included mods
         for (ModExportData mod : this.mods) {
             if (modIncludedInExport(mod)) {
@@ -99,7 +100,7 @@ class ExportHelper {
 
     private static final String[] colorTemplates = {"cards.html","cards.md","cards.wiki","wiki-card-data.txt","style.css"};
     private static final String[] indexTemplates = {"index.html","wiki-card-data.txt"};
-    private static final String[] commonTemplates = {"creatures.html","potions.html","relics.html","cards.html","creatures.md","potions.md","relics.md","cards.md","items.json","style.css"};
+    private static final String[] commonTemplates = {"creatures.html","keywords.html","potions.html","relics.html","cards.html","creatures.md","keywords.md","potions.md","relics.md","cards.md","items.json","style.css"};
     private static final String[] modTemplates = {"index.html","index.md"};
 
     void exportAllTemplates() {
@@ -153,6 +154,7 @@ class ExportHelper {
     public ArrayList<CreatureExportData> creatures = new ArrayList<>();
     public ArrayList<PotionExportData> potions = new ArrayList<>();
     public ArrayList<ColorExportData> colors = new ArrayList<>();
+    public ArrayList<KeywordExportData> keywords = new ArrayList<>();
 
     private void initModList() {
         mods.add(new ModExportData(this));
@@ -163,20 +165,34 @@ class ExportHelper {
 
     public ModExportData findMod(Class<?> cls) {
         // Inspired by BaseMod.patches.whatmod.WhatMod
-        URL locationURL = cls.getProtectionDomain().getCodeSource().getLocation();
-
-        if (locationURL == null) {
-            try {
-                ClassPool pool = Loader.getClassPool();
-                CtClass ctCls = pool.get(cls.getName());
-                String url = ctCls.getURL().getFile();
-                int i = url.lastIndexOf('!');
-                url = url.substring(0, i);
-                locationURL = new URL(url);
-            } catch (NotFoundException | MalformedURLException e) {
-                e.printStackTrace();
-            }
+        if (cls == null) {
+            return mods.get(0);
         }
+        URL locationURL = cls.getProtectionDomain().getCodeSource().getLocation();
+        if (locationURL == null) {
+            return findMod(cls.getName());
+        } else {
+            return findMod(locationURL);
+        }
+    }
+    public ModExportData findMod(String clsName) {
+        if (clsName == null) {
+            return mods.get(0);
+        }
+        try {
+            ClassPool pool = Loader.getClassPool();
+            CtClass ctCls = pool.get(clsName);
+            String url = ctCls.getURL().getFile();
+            int i = url.lastIndexOf('!');
+            url = url.substring(0, i);
+            URL locationURL = new URL(url);
+            return findMod(locationURL);
+        } catch (NotFoundException | MalformedURLException e) {
+            e.printStackTrace();
+            return mods.get(0);
+        }
+    }
+    public ModExportData findMod(URL locationURL) {
         if (locationURL == null) {
             return mods.get(0);
         }
@@ -322,6 +338,7 @@ class ExportHelper {
         model.with("creatures",mod.creatures);
         model.with("potions",mod.potions);
         model.with("cards",mod.cards);
+        model.with("keywords",mod.keywords);
         model.with("cardsAndUpgrades",withUpgrades(mod.cards));
         return model;
     }
@@ -350,6 +367,7 @@ class ExportHelper {
         model.with("creatures",this.creatures);
         model.with("potions",this.potions);
         model.with("cards",this.cards);
+        model.with("keywords",this.keywords);
         model.with("cardsAndUpgrades",withUpgrades(this.cards));
         model.with("mods",this.mods);
         return model;

@@ -21,6 +21,11 @@
     {% include 'classpath:../fragments/potions.html.twig' %}
     {% endif %}
 
+    {% if mod.keywords %}
+    <h1>{{mod.name}} keywords</h1>
+    {% include 'classpath:../fragments/keywords.html.twig' %}
+    {% endif %}
+
     {% if mod.creatures %}
     <h1>{{mod.name}} creatures</h1>
     {% include 'classpath:../fragments/creatures.html.twig' %}

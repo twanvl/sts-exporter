@@ -1,0 +1,14 @@
+<table class="sortable">
+  <tr>
+    <th>Name</th>
+    <th>Description</th>{% if listmod %}
+    <th>Mod</th>{% endif %}
+  </tr>
+  {% for keyword in keywords %}
+  <tr>
+    <td>{{ keyword.name }}</td>
+    <td>{{ keyword.descriptionHTML }}</td>{% if listmod %}
+    <td><a href="{{keyword.mod.id}}/index.html">{{ keyword.mod.modName }}</a></td>{% endif %}
+  </tr>
+  {% endfor %}
+</table>

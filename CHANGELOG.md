@@ -1,5 +1,6 @@
 ### v0.4.2
 * Added Json export
+* Added export of keywords
 * Sort cards and other items in the per mod export
 * Add color markup support for relic descriptions and flavor text
 * Correctly use UTF8 encoding for input and output files

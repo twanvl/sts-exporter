@@ -1,0 +1,5 @@
+| Name | Description |
+| ---- | ----------- |
+{% for keyword in keywords -%}
+| {{ keyword.name | capitalize }} | {{ keyword.descriptionPlain | replace({'\n':' '}) }} |
+{% endfor %}

@@ -45,5 +45,13 @@
       "name": "{{ creature.name | escape('json') }}"{% if listmod %},
       "mod": "{{ creature.mod.modName | escape('json') }}"{% endif %}
     }{% if not(loop.last) %},{% endif %}{% endfor %}
+  ],
+  "keywords": [{% for keyword in keywords %}
+    {
+      "name": "{{ keyword.name | capitalize | escape('json') }}",
+      "description": "{{ keyword.descriptionPlain | escape('json') }}"{% if listmod %},
+      "names": [{% for x in keyword.names %}"{{ x | escape('json') }}"{% if not(loop.last) %},{% endif %}{% endfor %}],
+      "mod": "{{ keyword.mod.modName | escape('json') }}"{% endif %}
+    }{% if not(loop.last) %},{% endif %}{% endfor %}
   ]
 }

@@ -8,7 +8,7 @@
   <tr>
     <td>{{ creature.name }}</td>
     <td><img src="{{ creature.image.relativeTo(dir) }}"></td>{% if listmod %}
-    <td><a href="{{mod.id}}/index.html">{{ creature.mod.modName }}</a></td>{% endif %}
+    <td><a href="{{creature.mod.id}}/index.html">{{ creature.mod.modName }}</a></td>{% endif %}
   </tr>
   {% endfor %}
 </table>
