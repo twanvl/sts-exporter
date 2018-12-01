@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.function.Consumer;
@@ -275,8 +276,15 @@ class ExportHelper {
     // Template exporting
     // ----------------------------------------------------------------------------
 
+    private static final Charset UTF_8 = Charset.forName("UTF-8");
     private static EnvironmentConfiguration twigConfiguration = EnvironmentConfigurationBuilder
         .configuration()
+            .resources()
+                .withDefaultInputCharset(UTF_8)
+            .and()
+            .render()
+                .withOutputCharset(UTF_8)
+            .and()
             .escape()
                 .engines()
                     .add("json", (input) -> StringEscapeUtils.escapeJava(input)) // close enough
