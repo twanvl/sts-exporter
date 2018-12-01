@@ -1,4 +1,4 @@
-<table class="sortable">
+<table class="sortable creatures">
   <tr>
     <th>Name</th>
     <th>Image</th>
@@ -9,7 +9,7 @@
   {% for creature in creatures %}
   <tr>
     <td>{{ creature.name }}</td>
-    <td><img src="{{ creature.image.relativeTo(dir) }}"></td>
+    <td class="image"><img src="{{ creature.image.relativeTo(dir) }}"></td>
     <td>{{ creature.type }}</td>
     <td>{{ creature.minHP }}{% if creature.minHP != creature.maxHP %}-{{ creature.maxHP }}{% endif %}</td>{% if listmod %}
     <td><a href="{{creature.mod.id}}/index.html">{{ creature.mod.modName }}</a></td>{% endif %}
