@@ -29,7 +29,13 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
     public AbstractCreature creature;
     public ExportPath image;
     public String name;
+    public String type;
+    public int minHP, maxHP;
     public ModExportData mod;
+    // for players
+    public boolean isPlayer;
+    public String cardColor;
+    // for creatures
 
     public CreatureExportData(ExportHelper export, AbstractCreature creature) {
         this.creature = creature;
@@ -37,6 +43,18 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
         this.mod = export.findMod(creature.getClass());
         this.mod.creatures.add(this);
         this.image = export.exportPath(this.mod, "creatures", creature.id != null ? creature.id : creature.getClass().getSimpleName(), ".png");
+        this.minHP = this.maxHP = creature.maxHealth;
+        if (creature instanceof AbstractPlayer) {
+            AbstractPlayer player = (AbstractPlayer)creature;
+            this.isPlayer = true;
+            this.type = "Player";
+            this.cardColor = Exporter.colorName(player.getCardColor());
+            this.minHP = this.maxHP = player.startingMaxHP;
+        } else if (creature instanceof AbstractMonster) {
+            AbstractMonster monster = (AbstractMonster)creature;
+            this.type = Exporter.toTitleCase(monster.type.toString());
+            // TODO: find and call constructor at different ascension levels to get max hp and other variables
+        }
     }
 
     public void exportImages() {
