@@ -233,26 +233,35 @@ class ExportHelper {
         FrameBuffer fbo = new FrameBuffer(Pixmap.Format.RGBA8888, iwidth, iheight, false);
         //make the FBO the current buffer
         fbo.begin();
-        //... clear the FBO color with transparent black ...
-        Gdx.gl.glClearColor(0f, 0f, 0f, 0f); //transparent black
-        Gdx.gl.glClear(Gdx.gl.GL_COLOR_BUFFER_BIT); //clear the color buffer
-        // set up batch and projection matrix
-        SpriteBatch sb = new SpriteBatch();
-        Matrix4 matrix = new Matrix4();
-        matrix.setToOrtho(x, x+width, y+height,y, 0.f, 1.f); // note: flip the vertical direction, otherwise cards are upside down
-        sb.setProjectionMatrix(matrix);
-        // render the thing
-        sb.begin();
-        render.accept(sb);
-        sb.end();
-        sb.dispose();
-        // write to png file
-        Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0,0, iwidth, iheight);
-        write.accept(pixmap);
-        pixmap.dispose();
-        // done
-        fbo.end();
-        fbo.dispose();
+        try {
+            //... clear the FBO color with transparent black ...
+            Gdx.gl.glClearColor(0f, 0f, 0f, 0f); //transparent black
+            Gdx.gl.glClear(Gdx.gl.GL_COLOR_BUFFER_BIT); //clear the color buffer
+            // set up batch and projection matrix
+            SpriteBatch sb = new SpriteBatch();
+            Matrix4 matrix = new Matrix4();
+            matrix.setToOrtho(x, x+width, y+height,y, 0.f, 1.f); // note: flip the vertical direction, otherwise cards are upside down
+            sb.setProjectionMatrix(matrix);
+            // render the thing
+            sb.begin();
+            try {
+                render.accept(sb);
+            } finally {
+                sb.end();
+                sb.dispose();
+            }
+            // write to png file
+            Pixmap pixmap = ScreenUtils.getFrameBufferPixmap(0,0, iwidth, iheight);
+            try {
+                write.accept(pixmap);
+            } finally {
+                pixmap.dispose();
+            }
+        } finally {
+            // done
+            fbo.end();
+            fbo.dispose();
+        }
     }
 
     public static Pixmap resizePixmap(Pixmap pixmap, int width, int height) {
