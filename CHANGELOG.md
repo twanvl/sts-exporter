@@ -1,6 +1,7 @@
 ### v0.4.3
-* Added more information to creature export
+* Added more information to creature export (type, HP)
 * Exporting of images can now be turned off in the mod config.
+* Better bounding boxes for creature export
 
 ### v0.4.2
 * Added Json export

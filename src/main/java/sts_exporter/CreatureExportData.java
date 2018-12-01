@@ -6,8 +6,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl.LwjglGraphics;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
+import com.esotericsoftware.spine.Skeleton;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.AbstractCreature;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
@@ -64,29 +68,62 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
 
     private void exportImageToFile(String imageFile) {
         Exporter.logger.info("Rendering creature image to " + imageFile);
+        // disable animation during rendering
+        float dt = Gdx.graphics.getDeltaTime();
+        setDeltaTime(0); // don't do animation steps
         // Get size of the creature.
         // We could use the hitbox, but that is not guaranteed to actually contain the whole image.
         // For now, just add a lot of padding.
         float scale = 1.0f / Settings.scale;
         float xpadding = 90.0f;
         float ypadding = 40.0f;
+        float x = creature.hb.x-xpadding;
+        float y = creature.hb.y-ypadding;
+        float width  = creature.hb.width+2*xpadding;
+        float height = creature.hb.height+2*ypadding;
+        // get size from the Spine skeleton
+        Skeleton skeleton = (Skeleton)ReflectionHacks.getPrivate(creature, AbstractCreature.class, "skeleton");
+        if (skeleton != null) {
+            Vector2 pos = new Vector2(), size = new Vector2();
+            creature.state.update(Gdx.graphics.getDeltaTime());
+            skeleton.updateWorldTransform();
+            skeleton.setPosition(creature.drawX + creature.animX, creature.drawY + creature.animY + AbstractDungeon.sceneOffsetY);
+            skeleton.getBounds(pos,size);
+            x = pos.x;
+            y = pos.y;
+            width = size.x;
+            height = size.y;
+        }
         // Render to a png
-        ExportHelper.renderSpriteBatchToPNG(creature.hb.x-xpadding,creature.hb.y-ypadding, creature.hb.width+2*xpadding,creature.hb.height+2*ypadding, scale, imageFile, (SpriteBatch sb) -> {
+        ExportHelper.renderSpriteBatchToPNG(x,y, width,height, scale, imageFile, (SpriteBatch sb) -> {
             // use AbstractCreature.render()
             // Note: the normal render code uses a PolygonSpriteBatch CardCrawlGame.psb, so make sure the projection is the same
             Matrix4 oldProjection = CardCrawlGame.psb.getProjectionMatrix();
             CardCrawlGame.psb.setProjectionMatrix(sb.getProjectionMatrix());
             boolean oldHideCombatElements = Settings.hideCombatElements;
             Settings.hideCombatElements = true; // don't render monster intent
-            if (creature instanceof AbstractPlayer) {
-                ((AbstractPlayer)creature).renderPlayerImage(sb);
-            } else {
-                creature.render(sb);
+            try {
+                if (creature instanceof AbstractPlayer) {
+                    ((AbstractPlayer)creature).renderPlayerImage(sb);
+                } else {
+                    creature.render(sb);
+                }
+            } finally {
+                // cleanup
+                setDeltaTime(dt);
+                CardCrawlGame.psb.setProjectionMatrix(oldProjection);
+                Settings.hideCombatElements = oldHideCombatElements;
             }
-            // cleanup
-            CardCrawlGame.psb.setProjectionMatrix(oldProjection);
-            Settings.hideCombatElements = oldHideCombatElements;
         });
+    }
+
+    private static void setDeltaTime(float deltaTime) {
+        // When we call AbstractPlayer.renderPlayerImage, this updates animations based on Gdx.graphics.getDeltaTime().
+        // So it would update the animation twice, resulting in a sped up animation.
+        // As a fix, we set deltaTime to 0
+        if (Gdx.graphics instanceof LwjglGraphics) {
+            ReflectionHacks.setPrivate(Gdx.graphics, LwjglGraphics.class, "deltaTime", deltaTime);
+        }
     }
 
     public static ArrayList<CreatureExportData> exportAllCreatures(ExportHelper export) {
@@ -157,7 +194,7 @@ public class CreatureExportData implements Comparable<CreatureExportData> {
         }
 
         // Custom monsters (BaseMod)
-		@SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
         HashMap<String,BaseMod.GetMonsterGroup> customMonsters =
             (HashMap<String,BaseMod.GetMonsterGroup>) ReflectionHacks.getPrivateStatic(BaseMod.class, "customMonsters");
         for (BaseMod.GetMonsterGroup group : customMonsters.values()) {
