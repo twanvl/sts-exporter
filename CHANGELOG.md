@@ -1,3 +1,7 @@
+### v0.4.3
+* Added more information to creature export
+* Exporting of images can now be turned off in the mod config.
+
 ### v0.4.2
 * Added Json export
 * Added export of keywords

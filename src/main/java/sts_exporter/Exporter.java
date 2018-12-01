@@ -28,6 +28,7 @@ public class Exporter implements PostInitializeSubscriber {
     SpireConfig config;
     public static final String CONFIG_EXPORT_AT_START = "export_at_startup";
     public static final String CONFIG_INCLUDE_BASE_GAME = "include_base_game";
+    public static final String CONFIG_RENDER_IMAGES = "render_images";
     public static final String CONFIG_EXPORT_DIR = "export_dir";
 
     public Exporter() {
@@ -39,6 +40,7 @@ public class Exporter implements PostInitializeSubscriber {
         }
         if (!config.has(CONFIG_EXPORT_AT_START)) config.setBool(CONFIG_EXPORT_AT_START, false);
         if (!config.has(CONFIG_INCLUDE_BASE_GAME)) config.setBool(CONFIG_INCLUDE_BASE_GAME, false);
+        if (!config.has(CONFIG_RENDER_IMAGES)) config.setBool(CONFIG_RENDER_IMAGES, true);
         if (!config.has(CONFIG_EXPORT_DIR)) config.setString(CONFIG_EXPORT_DIR, "export");
         // initialize
         BaseMod.subscribe(this);
@@ -57,6 +59,10 @@ public class Exporter implements PostInitializeSubscriber {
         }));
         settingsPanel.addUIElement(new ModLabeledToggleButton("Export items from the base game", 360, 650, Settings.CREAM_COLOR, FontHelper.charDescFont, config.getBool(CONFIG_INCLUDE_BASE_GAME), settingsPanel, l -> {}, button -> {
             config.setBool(CONFIG_INCLUDE_BASE_GAME, button.enabled);
+            saveConfig();
+        }));
+        settingsPanel.addUIElement(new ModLabeledToggleButton("Export images", 360, 600, Settings.CREAM_COLOR, FontHelper.charDescFont, config.getBool(CONFIG_RENDER_IMAGES), settingsPanel, l -> {}, button -> {
+            config.setBool(CONFIG_RENDER_IMAGES, button.enabled);
             saveConfig();
         }));
         settingsPanel.addUIElement(new ModButton(350, 200, settingsPanel, button -> {

@@ -36,15 +36,17 @@ class ExportHelper {
     ExportHelper(SpireConfig config) {
         this.dir = config.getString(Exporter.CONFIG_EXPORT_DIR);
         this.include_basegame = config.getBool(Exporter.CONFIG_INCLUDE_BASE_GAME);
+        this.render_images = config.getBool(Exporter.CONFIG_RENDER_IMAGES);
     }
 
     // ----------------------------------------------------------------------------
     // Exporting
     // ----------------------------------------------------------------------------
 
-    // Target directory
+    // Target directory and config
     String dir;
     boolean include_basegame;
+    boolean render_images;
 
     // Collect all items
     void collectAll() {
@@ -87,7 +89,9 @@ class ExportHelper {
     // Export all collected items
     void exportAll() {
         exportAllTemplates();
-        exportAllImages();
+        if (render_images) {
+            exportAllImages();
+        }
     }
 
     void exportAllImages() {
