@@ -3,7 +3,6 @@ package sts_exporter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Scanner;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -345,6 +344,9 @@ class RelicExportData implements Comparable<RelicExportData> {
         }
         for (AbstractRelic relic : RelicLibrary.blueList) {
             relics.add(new RelicExportData(export, relic, AbstractCard.CardColor.BLUE));
+        }
+        for (AbstractRelic relic : RelicLibrary.whiteList) {
+            relics.add(new RelicExportData(export, relic, AbstractCard.CardColor.PURPLE));
         }
         for (HashMap.Entry<AbstractCard.CardColor,HashMap<String,AbstractRelic>> entry : BaseMod.getAllCustomRelics().entrySet()) {
             for (AbstractRelic relic : entry.getValue().values()) {

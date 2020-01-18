@@ -1,3 +1,6 @@
+### v0.4.4
+* Export watcher relics
+
 ### v0.4.3
 * Added more information to creature export (type, HP)
 * Exporting of images can now be turned off in the mod config.
