@@ -1,3 +1,7 @@
+### v0.4.5
+* Fix export of relics without flavor text (#3)
+* Export custom keywords added with modId
+
 ### v0.4.4
 * Export watcher relics
 

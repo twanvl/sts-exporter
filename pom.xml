@@ -3,7 +3,7 @@
 
   <groupId>StSExporter</groupId>
   <artifactId>StSExporter</artifactId>
-  <version>0.4.4</version>
+  <version>0.4.5</version>
 
   <name>SpireExporter</name>
   <description>Exports Slay the Spire card images, relics, potions, creatures and other data to HTML</description>
