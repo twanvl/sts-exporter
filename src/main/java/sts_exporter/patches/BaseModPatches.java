@@ -9,9 +9,9 @@ import basemod.BaseMod;
 public class BaseModPatches {
     public static HashMap<String,String> keywordClasses = new HashMap<>();
 
-    @SpirePatch(clz = BaseMod.class, method="addKeyword", paramtypez={String.class, String[].class, String.class})
+    @SpirePatch(clz = BaseMod.class, method="addKeyword", paramtypez={String.class, String.class, String[].class, String.class})
     public static class AddKeyword {
-        public static void Postfix(String proper, String[] names, String description) {
+        public static void Postfix(String modId, String proper, String[] names, String description) {
             // A keyword was added, figure out which mod did it.
             String caller = getCallingClassName();
             if (caller != null) {
