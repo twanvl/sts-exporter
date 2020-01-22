@@ -168,7 +168,12 @@ class RelicExportData implements Comparable<RelicExportData> {
             // renderDescription
             FontHelper.renderSmartText(sb, FontHelper.cardDescFont_N, this.relic.description, (float)Settings.WIDTH / 2.0f - 200.0f * Settings.scale, (float)Settings.HEIGHT / 2.0f - 140.0f * Settings.scale - FontHelper.getSmartHeight(FontHelper.cardDescFont_N, this.relic.description, DESC_LINE_WIDTH, DESC_LINE_SPACING) / 2.0f, DESC_LINE_WIDTH, DESC_LINE_SPACING, Settings.CREAM_COLOR);
             // renderQuote
-            FontHelper.renderWrappedText(sb, FontHelper.SRV_quoteFont, this.relic.flavorText, (float)Settings.WIDTH / 2.0f, (float)Settings.HEIGHT / 2.0f - 310.0f * Settings.scale, DESC_LINE_WIDTH, Settings.CREAM_COLOR, 1.0f);
+            if (this.relic.flavorText != null) {
+                FontHelper.renderWrappedText(sb, FontHelper.SRV_quoteFont, this.relic.flavorText, (float)Settings.WIDTH / 2.0f, (float)Settings.HEIGHT / 2.0f - 310.0f * Settings.scale, DESC_LINE_WIDTH, Settings.CREAM_COLOR, 1.0f);
+            }
+            else {
+                FontHelper.renderWrappedText(sb, FontHelper.SRV_quoteFont, "\"Missing quote...\"", (float)Settings.WIDTH / 2.0f, (float)Settings.HEIGHT / 2.0f - 300.0f * Settings.scale, DESC_LINE_WIDTH, Settings.CREAM_COLOR, 1.0f);
+            }
         }, (Pixmap pixmap) -> {
             PixmapIO.writePNG(Gdx.files.local(this.popupImage.absolute), pixmap);
             Pixmap smallPixmap = ExportHelper.resizePixmap(pixmap, Math.round(width/2), Math.round(height/2));
